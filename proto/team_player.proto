@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "TeamPlayerProTos";
+import "base.proto";
+package com.proto;
+
+message DefaultListReq {
+    sint32 player_id = 1;
+}
+
+message DefaultListRes {
+    sint32 ret = 1;
+}
+
+message BaseInfoReq {
+    string team_id = 1;
+    sint32 team_player_num = 2;
+    string english_name = 3;
+}
+
+message BaseInfoRes {
+    sint32 ret = 1;
+}
+
+message CapInfoReq {
+    string team_id = 1;
+    sint32 team_player_num = 2;
+}
+
+message CapInfoRes {
+    sint32 ret = 1;
+}
+//我的球员
+message PlayersRes{
+    sint32 ret = 1;
+    repeated PlayersInfoPB data = 2;//球员信息
+}

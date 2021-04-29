@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "RuleConfigProtos";
+
+//通用基本配置数据请求
+message rulesReq {
+    string itemId = 1;
+}
+
+//通用基本配置数据返回
+message ruleRes{
+
+}
+
+

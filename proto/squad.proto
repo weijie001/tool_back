@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "SquadProtos";
+
+import "base.proto";
+package com.proto;
+
+// 获取球队阵型信息列表
+message TeamSquadsReq {
+    bool isInGame = 1;                      // 是否在游戏中获取
+}
+message TeamSquadsRes {
+    sint32 ret = 1;                         // 状态码
+    repeated int32 squads = 2;              // 已经激活阵型ID列表
+    int32 useCustomNo = 3;                  // 自定义编号, 目前正使用的哪套自定义阵型
+    repeated CustomSquadPB pages = 4;       // 三套阵型信息列表
+}
+
+// 激活阵型
+message ActivateSquadReq {
+    int32 squadId = 1;                      // 阵型ID
+}
+message ActivateSquadRes {
+    sint32 ret = 1;                         // 状态码
+    repeated ItemAwardPB awards = 2;        // 获得物品列表
+}
+
+// 更换阵型
+message ChangeSquadReq {
+    int32 squadPage = 1;                    // 哪套阵型更换阵型
+    int32 squadId = 2;                      // 更换为哪个阵型ID
+    int32 tacticPage = 3;                   // 使用了哪套战术
+    bool isInGame = 4;                      // 是否在游戏中更换
+}
+message ChangeSquadRes {
+    sint32 ret = 1;                         // 状态码
+    CustomSquadPB page = 2;                 // 阵型属性页数据
+}
+
+// 替补之间或首发之间或替补与首发球员间的位置互换
+message ChangePositionReq {
+    int32 squadPage = 1;                    // 哪套阵型更替补席
+    int32 sourcePlayerNum = 2;              // 球员num1
+    int32 targetPlayerNum = 3;              // 球员num2
+    bool isInGame = 4;                      // 是否在游戏中更换
+}
+message ChangePositionRes {
+     sint32 ret = 1;                        // 状态码
+     CustomSquadPB page = 2;                // 阵型属性页数据
+}

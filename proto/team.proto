@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "TeamProtos";
+import "base.proto";
+package com.proto;
+
+message TeamLoginRes {
+    sint32                  ret = 1;//响应码
+    repeated TeamItemPB   items = 2;//道具列表
+    sint32 scout_count = 3;//球探最大数量
+    sint32 pve_Level = 4; // PVE联赛等级
+    sint32 pvp_level = 5; // PVP天梯等级
+}
+
+message TeamFieldReq {
+    string team_id = 1;
+    string value = 2;
+}
+
+message PurchaseGoldReq {
+    sint32 gold = 1;
+}
+
+message PurchaseGoldRes {
+    sint32 ret = 1;
+    sint32 gold = 2;
+}
+message TeamRes {
+    sint32 ret = 1;
+}
+
+message GalaCurrencyExchangeRes{
+    sint32 ret = 1;
+    repeated GalaCurrencyPB gala_currency = 2;
+}
+
+message GalaCurrencyPB{
+    sint32 price = 1;//gala币
+    sint32 num = 2;//gala数量
+    sint32 rmb = 3;//人名币
+}

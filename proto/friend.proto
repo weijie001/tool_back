@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "FriendProtos";
+import "base.proto";
+
+package com.proto;
+
+message FriendTeamIdReq {
+  string friendTeamId = 1;
+}
+
+message FriendTeamIdsReq {
+  sint32 status = 1;                      // 1 同意，2拒绝
+  repeated string friendTeamId = 2;
+}
+
+message BatchAddFriendReq {
+  repeated string friend_team_ids = 1;
+}
+
+message FriendRes {
+  string teamId = 1;                          // 球队id
+  string accountId = 2;                       // 账号中心记录的唯一标识
+  string teamName = 3;                        // 球队名字
+  sint32 level = 4;                           // 等级
+  string headPortrait = 5;                    // 用户头像
+  string headPortraitFrame = 6;               // 用户头像框
+  sint64 lastLoginTime = 7;                   // 最后登录时间
+  sint32 relation = 8;// 好友和当前用户的关系 0,还不是好友 1,已经申请过了 2,已经是好友关系了
+  sint32 cap = 9;//战力
+  repeated sint32 medals=10;//勋章
+}
+
+message BlacklistRes {
+  string teamId = 1;                          // 球队id
+  string accountId = 2;                       // 账号中心记录的唯一标识
+  string teamName = 3;                        // 球队名字
+  sint32 level = 4;                           // 等级
+  string headPortrait = 5;                    // 用户头像
+  string headPortraitFrame = 6;               // 用户头像框
+}
+
+message FriendListRes {
+  sint32 ret = 1;                       // code
+  repeated FriendRes friend = 2;
+}
+
+message BlacklistListRes {
+  sint32 ret = 1;                       // code
+  repeated BlacklistRes blacklist = 2;
+}

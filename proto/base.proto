@@ -1,0 +1,184 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "BaseProtos";
+
+/** BasePbMapper 提供了转换方法 */
+
+//异常统一回包
+message ExceptionRes {
+  sint32 ret = 1; //响应码
+  sint64 extra = 2; //附带信息
+}
+
+// 仅响应码返回
+message BaseRes {
+  sint32 ret = 1; // 响应码
+}
+
+// 分页请求
+message PageReq {
+  sint32 page = 1;     // 第几页
+  sint32 pageSize = 2; // 每页数量
+}
+
+// 整形请求
+message IntReq {
+  sint32 req = 1;
+}
+// 整形返回
+message IntRes {
+  sint32 ret = 1; // 响应码
+  sint32 res = 2;
+}
+// 整形列表返回
+message IntListRes {
+  sint32 ret = 1; // 响应码
+  repeated sint32 res = 2;
+}
+
+// 长整形请求
+message LongReq {
+  sint64 req = 1;
+}
+// 长整形返回
+message LongRes {
+  sint32 ret = 1; // 响应码
+  sint64 res = 2;
+}
+// 长整形列表返回
+message LongListRes {
+  sint32 ret = 1; // 响应码
+  repeated sint64 res = 2;
+}
+
+// 字符串请求
+message StrReq {
+  string req = 1;
+}
+// 字符串返回
+message StrRes {
+  sint32 ret = 1; // 响应码
+  string res = 2;
+}
+// 字符串列表返回
+message StrListRes {
+  sint32 ret = 1; // 响应码
+  repeated string res = 2;
+}
+
+// 整形 + 字符串 请求
+message TupleReq {
+  sint32 num = 1;
+  string str = 2;
+}
+// 整形 + 字符串 返回
+message TupleRes {
+  sint32 ret = 1; // 响应码
+  sint32 num = 2;
+  string str = 3;
+}
+
+//道具信息
+message ItemProto{
+  int32 itemId = 1;//道具id
+  int32 itemNum = 2;//道具数量
+}
+
+message ItemAwardPB{
+  sint32 item_id = 1; //道具资源id
+  sint32 num = 2; //数量
+}
+
+message TeamItemPB{
+  sint32 item_id = 1; //道具资源id
+  sint32 num = 2; //数量
+  sint32 type = 3;//类型
+}
+
+//玩家球员信息
+message PlayersInfoPB{
+  sint32 player_id = 1; //球员配置id
+  sint32 player_num = 2; //玩家球员唯一id
+  sint32 position = 3; //0代表没上场，>0代表上场位置
+}
+
+message BallPlayerProto{
+  int32 caseId = 1;/** caseId */
+  int32 playerId = 2;/** 序号 */
+  int32 model = 3; /** 模型 */
+  string chineseName = 4;/** 中文姓名 */
+  string englishName = 5;/** 英文简称 */
+  string englishFullname = 6;/** 英文全称 */
+  int32 shirtNumber = 7; /** 球衣号码 */
+  int32 age = 8; /** 年龄 */
+  int32 height = 9;/** 身高 */
+  int32 weight = 10;/** 体重 */
+  int32 legLength = 11;/** 腿长 */
+  int32 armLength = 12; /** 臂展 */
+  int32 preferredFoot = 13;/** 惯用脚 */
+  int32 nationality= 14;/** 国籍编号 */
+  string nationalityName = 15;/** 国籍名称 */
+  int32 leagueId = 16;/** 所属联赛ID */
+  int32 clubId = 17;/** 所属俱乐部ID */
+  int32 positionType = 18; /** 第一位置id */
+  string positionTypeDesc = 19;/** 第一位置 */
+  int32 acess = 20;/** 产出途径 */
+  int32 overRating = 21;/** 总能力 */
+  int32 heading = 22;/** 头球属性 */
+  int32 finishing = 23;/** 射门准确度属性 */
+  int32 curl = 24;/** 弧度属性 */
+  int32 placeKicking = 25;/** 定位球属性 */
+  int32 kickingPower = 26;/** 射门力量属性 */
+  int32 ballWinning = 27;/** 抢断属性 */
+  int32 defensiveAwareness = 28;/** 防守能力属性 */
+  int32 jump = 29;/** 跳跃属性 */
+  int32 stamina = 30;/** 体力属性 */
+  int32 physicalContact = 31; /** 身体接触属性 */
+  int32 speed = 32;/** 速度属性 */
+  int32 acceleration = 33;/** 加速度属性 */
+  int32 deceleration =34;/** 减速度属性 */
+  int32 ballControl = 35;/** 控球属性 */
+  int32 dribbling = 36;/** 带球属性 */
+  int32 lowPass = 37;/** 地面传球属性 */
+  int32 loftedPass = 38;/** 长传属性 */
+  int32 gkReflexes = 39; /** 门将反应属性 */
+  int32 gkCatching =40;/** 门将接球属性 */
+  int32 gkClearing = 41;/** 门将解围属性 */
+  int32 gkReach = 42;/** 门将覆盖区域属性 */
+  int32 weakFootAccuracy = 43;/** 惯用脚精度属性 */
+  int32 form = 44;/** 状态起伏属性 */
+  int32 injuryResistance = 45;/** 抗受伤属性 */
+  repeated ScoutCategoryPB scout_category = 46;
+}
+message ScoutCategoryPB{
+  sint32 categoryId = 1;
+  sint32 professionalAreaId = 2;
+}
+
+// 自定义的战术属性页
+message CustomTacticPB {
+    int32 no = 1;                           // 对应的自定义战术编号目前为1-3
+    string name = 2;                        // 自定义的战术名称
+    repeated int32 baseId = 3;              // 设置选中的基础战术ID列表
+    repeated int32 attackId = 4;            // 设置选中的攻击战术ID列表,不会超过解锁的进攻战术槽数量
+    repeated int32 defendId = 5;            // 设置选中的防守战术ID列表,不会超过解锁的防守战术槽数量
+}
+
+// 自定义的阵型属性页
+message CustomSquadPB {
+    int32 no = 1;                           // 对应1-3页
+    int32 combat = 2;                       // 总战力
+    repeated PlayersInfoPB starter = 3;     // 阵型中首发球员信息
+    repeated int32 bench = 4;               // 阵型中替补球员
+    int32 squadId = 5;                      // 本套阵型使用的阵型ID
+    CustomTacticPB tactic = 6;              // 本套阵型使用的战术
+
+}
+
+// 球员属性点数据
+message AttributePointPB {
+  int32 attribute_id = 1;                   // 属性ID
+  string attribute_name = 2;                // 属性名
+  int32 point_num = 3;                      // 加点数量
+}

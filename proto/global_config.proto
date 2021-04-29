@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "GlobalConfigProtos";
+import "base.proto";
+package com.proto;
+message ScoutConfigRulesRes {
+    sint32                  ret = 1;//响应码
+    repeated ScoutCategoryRulePB   scout_category_rules = 2;//道具列表
+    repeated ScoutRateAbilityRulePB   scout_rate_ability_rules = 3;//道具列表
+    repeated ScoutRulePB   scout_rules = 4;//道具列表
+    repeated ScoutStarRateRulePB   scout_star_rate_rules = 5;//道具列表
+}
+
+message ScoutCategoryRulePB{
+    sint32 category_id = 1;
+    sint32 professional_area_id = 2;
+    string category_name = 3;
+    string professional_area_name = 4;
+}
+
+message ScoutRateAbilityRulePB{
+    sint32 id = 1;
+    sint32 player_rate = 2;
+    sint32 player_ability = 3;
+    sint32 ability_probability = 4;
+}
+message ScoutRulePB{
+    sint32 scout_id = 1;
+    sint32 category_id = 2;
+    sint32 professional_area_id = 3;
+    sint32 scout_star = 4;
+    sint32 sell_price = 5;
+}
+message ScoutStarRateRulePB{
+    sint32 id = 1;
+    sint32 scout_search_star = 2;
+    sint32 search_currency_num = 3;
+    sint32 player_rate = 4;
+    sint32 player_rate_probability = 5;
+}
+
+message ItemsRes{
+    sint32 ret = 1;
+    repeated ItemPb items =2;
+}
+
+message ItemPb{
+    sint32 item_id = 1;
+    sint32 item_type = 2;
+    string name =3;
+    string desc = 4;
+    repeated string output = 5;
+    sint32 can_use = 6;
+}
+
+//队伍相关配置数据
+message BallPlayersRes{
+    sint32 ret = 1;
+    repeated BallPlayerProto ballPlayers = 2;
+}
+
+message LeagueConfigsRes{
+    sint32                  ret = 1;//响应码
+    repeated LeagueSkillChallengeRulePB   league_skill_challenge_rules = 2;
+    repeated LeagueSpecialMatchRulePB league_special_match_rules = 3;
+}
+
+message LeagueSkillChallengeRulePB {
+    sint32 id = 1;
+    string title = 2;
+    string desc = 3;
+    string recommend_ability1 = 4;
+    string recommend_ability2 = 5;
+    string recommend_ability3 = 6;
+}
+
+message LeagueSpecialMatchRulePB {
+    sint32 id = 1;
+    string title = 2;
+    string desc = 3;
+}

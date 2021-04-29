@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "LeagueProtos";
+
+import "base.proto";
+
+package com.proto;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+//联赛主界面
+message LeagueInfoRes{
+    sint32    ret = 1;
+    sint32    league_id = 2;//当前联赛
+    repeated LeagueMatchInfoPB match_info = 3;//赛程
+    repeated  LeagueRankPB    ranks = 4;//积分榜
+}
+
+message LeagueMatchInfoPB{
+    sint32    month = 1;//赛程月份
+    sint32    day = 2;//赛程日期
+    sint32    round = 3;//联赛轮次
+    sint32    schedule_type = 4;//赛程类型
+    sint32    sub_id = 5;//子ID
+    sint32    status = 6;//赛程状态0锁住,1可挑战,2已挑战
+    sint32    result_type = 7;//比赛输赢 1赢 2 输 3 平
+    sint32    team_type = 8;// 1:主队;2:客队
+    sint32    goals =9;//玩家进球数
+    sint32    club_goals =10;//npc进球数
+    string    club_id =11;//挑战队
+    sint32    cap = 12; //球队能力
+    sint32    score = 13;//积分
+    sint32    max_score = 14;//最高积分
+    repeated   ItemAwardPB item_awards= 15;//奖励
+}
+//积分排名
+message LeagueRankRes {
+    sint32    ret = 1;//ret
+    repeated  LeagueRankPB    ranks = 2;//积分排名
+    repeated  LeaguePlayerRankPB    score_ranks = 3;//射手榜
+    repeated  LeaguePlayerRankPB    assist_ranks = 4;//助攻榜
+
+}
+
+message LeagueRankPB {
+    sint32    rank = 1;//排名
+    string    team_id = 2;//
+    sint32    win = 3;//胜
+    sint32    draw = 4;//平
+    sint32    lose = 5;//负
+    sint32    point = 7;//积分
+    sint32    goals = 8;//进球
+    sint32    fumbles = 9;// 失球
+}
+
+message LeaguePlayerRankPB {
+    string    team_id = 1;//球队id
+    sint32    player_id = 2;//球员id
+    sint32    goals = 3;//进球
+    sint32    assists = 4;//助攻
+}
+
+//联赛事件回包
+message LeagueGainAwardRes {
+    sint32    ret = 1;//ret
+    repeated        ItemAwardPB    items = 2;//奖励资源
+}

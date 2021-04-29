@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "GameProtos";
+
+import "base.proto";
+package com.proto;
+
+//比赛结束
+message EndGameReq{
+    sint32                        score = 1;
+    sint32                        club_score = 2;
+    sint32 team_type = 3;//1 主队 2客队
+    repeated GamePlayerResult players = 4;
+    repeated GamePlayerResult club_players = 5;
+    sint32 end_type = 6;//结束类型 0正常结束 1放弃
+}
+
+message GamePlayerResult{
+    sint32 player_id = 1;
+    sint32 team_player_num = 2;
+    sint32 score = 3;
+    sint32 assist = 4;
+}
+message EndGameRes{
+    sint32                        ret = 1;//ret
+    repeated     ItemAwardPB            award_items = 7;//产出的资源
+}

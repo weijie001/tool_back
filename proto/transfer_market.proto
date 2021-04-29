@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "TransferMarketProtos";
+import "base.proto";
+
+package com.proto;
+
+message TeamMarketReq {
+    string team_id = 1;
+}
+
+message TeamPlayerReq {
+    string team_id = 1;
+    sint32 player_id = 2;
+}
+
+message TransferMarketPlayerRes{
+    sint32 ret = 1;
+    sint32 gold = 2;//金币
+    sint32 refresh_num = 3;//刷新次数
+    repeated PlayerDataPB data = 4;//球员信息
+}
+
+message PlayerDataPB{
+    sint32 price =1;//出售价格
+    string player_type =2;//球员类型
+    sint32 discount_price = 3;//折扣价格
+    sint32 player_id = 4;//球员ID
+    sint32 status = 5;//状态（1：在售;2:已售）
+}
+
+message KeyPlayerRes{
+    sint32 ret = 1;
+    bool elite = 2;//是否精英球员
+}
+
+message PurchasePlayerRes{
+    sint32 ret = 1;
+    bool elite = 2;//是否主力球员
+    sint32 gold = 3;//金币
+}
+
+message CommonRes{
+    sint32 ret = 1;
+}
+
+message CommonGoldRes{
+    sint32 ret = 1;
+    sint32 gold = 2;//金币
+}

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "UserProtos";
+import "base.proto";
+
+//客户端用命名空间
+package com.proto;
+//UserPB User
+message UserPB {
+    sint32 user_id = 1; //用户id
+    string account_id = 2; //账户id
+    string channel_account_id = 3; //渠道账户id
+    string user_name = 4; //用户名
+    string logo = 5; //用户logo
+    sint32 index = 6; //新手引导步骤
+}

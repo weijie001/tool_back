@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "FrameRoomProtos";
+import "base.proto";
+
+//客户端用命名空间
+package com.proto;
+//
+message SimpleFramePB {
+    sint32 turnId = 1; //逻辑帧id
+    repeated string ctrls = 2; //操作
+}
+
+message OnceSend {
+    repeated SimpleFramePB frames = 1;
+}
+
+message SyncTurnReq {
+    sint32 turnId = 1; //逻辑帧id
+}
+
+message SyncTurnRes {
+    sint32 ret = 1;
+}
+
+message OneOption {
+    sint32 turnId = 1;
+    string option = 2;
+}

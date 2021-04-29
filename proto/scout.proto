@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "ScoutProtos";
+import "base.proto";
+
+package com.proto;
+
+//球探搜索
+message ScoutSearchReq{
+    repeated sint32 scout_id = 1;//球探ID
+}
+
+message ScoutSearchRes{
+    sint32 ret = 1;   // 状态码
+    sint32 player_id = 2;   //搜索的球员
+    sint32 gold = 3;//消耗的金币
+}
+
+//解雇
+message FireScoutReq{
+    sint32 fire_type = 1;//解雇类型 1:普通解雇; 2:一键解雇
+    sint32 item_id = 2;//球探ID
+    sint32 count = 3;//数量
+    repeated sint32 stars =4;//星级
+}
+
+message FireScoutRes{
+    sint32 ret = 1;   // 状态码
+    sint32 gold = 2; // 解雇获得金币
+    repeated   ItemAwardPB item_awards= 3;//解雇的球探
+}
+
+message BallPlayerScoutCategoryRes{
+    sint32 ret = 1;
+    repeated ScoutCategoryInfo info = 2;
+}
+message ScoutCategoryInfo{
+    int32 playerId = 1;/** 序号 */
+    repeated ScoutCategoryPB scout_category = 2;
+}

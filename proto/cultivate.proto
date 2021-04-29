@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "CultivateProtos";
+
+import "base.proto";
+package com.proto;
+
+
+// 查询球员升级时拥有的材料
+message QueryUpgradeMaterialReq {
+    int32 player_num = 1;            // 需要升级的球员编号
+}
+message QueryUpgradeMaterialRes {
+    sint32 ret = 1;                 // 状态码
+    repeated int32 exp_cards = 2;    // 可选的经验卡列表
+    repeated int32 player_cards = 3; // 可选的球员卡列表
+}
+
+// 球员升级请求
+message BallPlayerUpgradeReq {
+    int32 player_num = 1;            // 需要升级的球员编号
+    repeated int32 exp_cards = 2;    // 消耗的经验卡列表
+    repeated int32 player_cards = 3; // 消耗的球员编号列表
+}
+message BallPlayerUpgradeRes {
+    sint32 ret = 1;                  // 状态码
+    sint32 level = 2;                // 球员当前等级
+    sint32 exp = 3;                  // 球员当前经验值
+    repeated int32 exp_cards = 4;    // 本次多的未消耗的经验卡列表
+    repeated int32 player_cards = 5; // 本次多的未消耗的球员编号列表
+}
+
+// 球员突破请求
+message BallPlayerBreakthroughReq {
+    int32 player_num = 1;
+    int32 rarity_card = 2;
+    int32 rarity_and_pos = 3;
+    int32 same_card = 4;
+    repeated TeamItemPB cost_items = 5;
+}
+message BallPlayerBreakthroughRes {
+    sint32 ret = 1;                 // 状态码
+}
+
+// 球员加点请求
+message BallPlayerAddPointReq {
+    int32 player_num = 1;           // 球员编号
+    repeated AttributePointPB add_points = 2; // 属性的加点
+}
+message BallPlayerAddPointRes {
+    sint32 ret = 1;                 // 状态码
+}
+
+

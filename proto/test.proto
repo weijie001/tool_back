@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "TestProtos";
+import "base.proto";
+
+package com.proto;
+
+message TestReq {
+    string uid = 1;
+}

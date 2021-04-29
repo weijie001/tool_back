@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "AgentProtos";
+
+import "base.proto";
+package com.proto;
+
+message AgentInfoRes{
+    sint32 ret = 1;//状态码
+    repeated AgentActivityInfoPB agent_activity_infos = 2;//经纪人活动信息
+}
+
+message AgentActivityInfoPB{
+    sint32 agent_id = 1;//经纪人ID
+    sint32 activity_id = 2;//活动ID
+    sint64 begin_time = 3;//活动开始时间
+    sint64 end_time = 4;//活动结束时间
+    sint32 continue_time = 5;//单活动持续时间 -小时
+    sint32 round = 6;//轮换次数
+    sint32 category = 7;//类别，1单活动，2组合活动
+
+    sint32 curr_agent_id = 8;//经纪人ID
+    sint32 times = 9;//离保底还有多少次
+    bool first_search = 10;//是否首次搜索
+    sint32 curr_round=11;//当前轮次
+}
+message AgentInfoPB{
+
+    //sint64 begin_time = 5;//每轮的开始时间
+    //sint64 end_time = 6;//每轮的结束时间
+}
+message AgentSearchReq{
+    sint32 activity_id = 1;//活动ID
+    sint32 agent_id = 2;//经纪人ID
+    sint32 search_num = 3;// 1or10
+    sint32 round =4;//轮次
+}
+
+message AgentSearchRes{
+    sint32 ret = 1;//状态码
+    repeated AgentSearchResultPB search_result = 2;//搜索结果列表
+    repeated ItemAwardPB item_awards = 3;//消耗的资源
+}
+
+message AgentSearchResultPB{
+    sint32 type = 1;//1球员 2 球探
+    sint32 id = 2;//球探ID | 球员ID
+}

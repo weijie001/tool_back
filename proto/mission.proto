@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "MissionProtos";
+
+import "base.proto";
+
+package com.proto;
+
+//任务主界面
+message MissionInfoRes{
+    sint32 ret = 1;//响应码
+    sint32 satisfaction = 2;//总的满意度
+    repeated sint32 mission_type = 3;//任务类型 1 每日任务 2 球星挑战 4 限时挑战
+    sint32 buff_id = 4;//buff_Id
+    bool buff_trigger = 5;//是否首次触发
+    repeated SatisfactionAwardPB satisfaction_award = 6;//满意度奖励领取情况
+    sint32 satisfaction_last = 7;//最后显示的满意度
+}
+message SatisfactionAwardPB{
+    sint32 satisfaction = 1;//满意度
+    sint32 status   =  2; //满意度奖励领取状态 1 未完成 2 未领取 3已领取
+}
+
+//任务列表
+message TeamMissionReq{
+    sint32 mission_type = 1;//任务类型
+}
+
+message TeamMissionRes{
+    sint32 ret = 1;//响应码
+    repeated TeamMissionPB team_missions = 2;//任务详情
+}
+
+message TeamMissionPB{
+    sint32 mission_id = 1;
+    sint32 progress = 2;//进度
+    sint32 status = 3;//状态 1 未完成 2 未领取 3已领取
+}
+//领取任务奖励
+message GainMissionAwardReq{
+    sint32 mission_id = 1;//任务ID
+}
+
+//领取满意度奖励
+message GainSatisfactionAwardReq{
+    sint32 satisfaction = 1;//满意度
+}
+
+message GainAwardRes{
+    sint32 ret = 1;//响应码
+    repeated ItemAwardPB awards = 2;//道具
+    sint32 satisfaction_last = 3;//最后显示的满意度
+}
+
+message GainMissionAwardRes{
+    sint32 ret = 1;//响应码
+    sint32 satisfaction = 2;//总的满意度
+    repeated ItemAwardPB awards = 3;//道具
+    repeated SatisfactionAwardPB  satisfaction_award = 4;//满意度奖励
+    bool is_trigger = 5;//是否触发限时挑战
+    sint32 satisfaction_last = 6;//最后显示的满意度
+}

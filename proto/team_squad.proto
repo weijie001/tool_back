@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "TeamSquadProTos";
+import "base.proto";
+package com.proto;
+
+//替换阵型
+message SquadChangeReq {
+    string teamId = 1;
+    int32 squadId = 2;
+}
+
+//替换阵型回包
+message SquadChangeRes {
+    sint32 ret = 1;
+    repeated PlayersInfoPB playerInfos = 2;
+
+}
+
+//替换球员阵型位置
+message SquadPlayerChangeReq {
+    string teamId = 1;
+    int32 sourcePlayerNum = 2;
+    int32 targetPlayerNum = 3;
+}
+
+//替换球员阵型位置
+message SquadPlayerChangeRes {
+    sint32 ret = 1;
+}
+
+//
+message SquadReq {
+    string teamId = 1;
+}
+
+//阵容查询回包
+message SquadRes {
+    sint32 ret = 1;
+    repeated sint32 player_id = 2;//阵容信息
+}
+
+//选择队长或进攻核心请求包
+message ChooseSquadReq {
+    string team_id = 1;
+    sint32 player_id = 2;
+}
+
+//球队人员选择回包
+message ChooseSquadRes {
+    sint32 ret = 1;
+}
+
+

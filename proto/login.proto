@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "LoginProtos";
+import "base.proto";
+
+package com.proto;
+
+message LoginReq {
+    string channel = 1;
+    string channel_info = 2; //渠道信息
+    string account_id = 3;
+    string token = 4;
+    sint32 language = 5;
+    sint32 mobile_os = 6; //手机操作系统类型，0表示Android ，1表示 apple
+    string driver = 7; //设备信息
+    string server_id = 8; //
+}
+
+message LoginRes {
+    sint32 ret = 1;
+    sint64 loginTime = 2; //登录时间戳
+    string serverId = 3; //服务器信息，表示哪一台服务
+    string team_id = 4; //是否是初始创建 球队， 1表示 初始创建球队
+    string team_name = 5;
+    repeated PlayersInfoPB players = 6;
+    sint32 gold = 7;//金币
+    sint32 strength = 8;//实力
+    sint32 badgeId = 9; //使用的队徽
+    CustomSquadPB squad_page = 10;// 当前使用阵形
+}
+
+message PvpInfoReq{
+    string team_id =1;
+}
+
+//pvp消息
+message PvpInfoRes{
+    sint32 ret =1;
+    string ip = 2;
+    sint32 port =3;
+}

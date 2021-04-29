@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "TeamCoachProTos";
+import "base.proto";
+package com.proto;
+
+//主教练选择请求包
+message AddCoachReq {
+    string english_name = 1;
+    string chinese_name = 2;
+    sint32 nationality = 3;
+    string nationality_name = 4;
+    sint32 gender = 5;
+    sint32 model = 6;
+    sint32 appearance = 7;
+    string team_id = 8;
+}
+
+//更新主教练名称请求包
+message UpdateCoachReq {
+    string team_id = 1;
+    string name = 2;
+}
+
+//回包
+message CoachRes {
+    sint32 ret = 1;
+}

@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "StoreProtos";
+import "base.proto";
+
+//商店列表回包
+message StoreListRes{
+    sint32      ret            =1;
+    repeated    StorePB     stores  =2;//
+}
+//商店名称PB
+message StorePB{
+    sint32      store_id        =1;
+    sint32 order = 2;   //排序
+}
+
+message StoreGiftRes{
+    sint32      ret        =1;
+    repeated    StoreGifts   store_gifts    =2;
+    sint64  end_time        =3;//下一次自动刷新时间戳
+}
+
+message StoreGifts{
+    sint32      gift_id           =1;//礼包ID
+    sint32 price = 2;//价格
+    sint32 discount = 3;//折扣
+    sint32 state = 4;//状态  未购买1 已购买2
+    sint32 star = 5;//星级
+    sint32 origin_price = 6;//原价
+}
+
+message StoreFlushReq{
+    sint32      flush_type       =1;//1 自动刷新 2手动刷新
+    sint32      store_id       =2; //商店id
+}
+
+message BuyGiftReq{
+    sint32      gift_id         =1;//礼包id
+    sint32      store_id         =2;//商店id
+}
+
+message BuyGiftRes{
+    sint32      ret             =1;
+    repeated    ItemAwardPB     item_awards   =2;//道具
+}

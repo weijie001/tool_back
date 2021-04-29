@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "AllianceProtos";
+package com.proto;
+
+// 创建联盟
+message CreateAllianceReq {
+  string name = 1;
+  string logo = 2;
+}
+
+
+message AllianceListRes {
+  sint32 ret = 1;
+  repeated AllianceRes alliance_res = 2;
+}
+
+message AllianceRes {
+  string allianceId = 1;
+  string name = 2;
+  string announcement = 3;
+  string logo = 4;
+  sint32 level = 5;
+  sint32 levelLimit = 6;
+  string exp = 7;
+  sint32 teamCount = 8;
+  sint32 maxTeamCount = 9;
+}
+
+// 加入联盟
+message JoinAllianceReq {
+  string allianceId = 1;
+}
+
+// 离开联盟
+message LeaveAllianceReq {
+  string allianceId = 1;
+}
+
+
+// 踢人
+message KickReq {
+  string allianceId = 1;
+  string kickTeamId = 2;
+}
+
+// 公告编辑
+message EditAnnouncementReq {
+  string allianceId = 1;
+  string announcement = 2;
+}
+
+// 修改盟徽
+message UpdateLogoReq {
+  string allianceId = 1;
+  string logo = 2;
+}
+
+
+// 入盟申请列表
+message ApplyListReq {
+  string allianceId = 1;
+  sint32 page = 2;
+  sint32 pageSize = 3;
+}
+message ApplyListRes {
+  sint32 ret = 1;
+  repeated AllianceApplyRes allianceApplyRes = 2;
+}
+message AllianceApplyRes {
+  sint32 id = 1;
+  string allianceId = 2;
+  string teamId = 3;
+  sint32 status = 4;
+  string desc = 5;
+}
+
+// 入盟申请处理
+message HandleApplyReq {
+  sint32 ret = 1;
+  string joinTeamId = 2;
+  string allianceId = 3;
+  bool agree = 4 ;
+}

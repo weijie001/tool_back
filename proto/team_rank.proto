@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "TeamRankProtos";
+import "base.proto";
+package com.proto;
+
+//匹配请求
+message TeamRankReq {
+    sint32 rank_type = 1;
+}

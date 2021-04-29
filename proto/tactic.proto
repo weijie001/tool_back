@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "TacticProtos";
+
+import "base.proto";
+package com.proto;
+
+// 球队战术信息列表
+message TeamTacticsRes {
+    sint32 ret = 1;                         // 状态码
+    repeated int32 tactics = 2;             // 已经激活战术ID列表 所有战术ID需要读表
+    int32 attackSlotNum = 3;                // 进攻战术槽解锁了的数量,最大为2
+    int32 defendSlotNum = 4;                // 防守战术槽解锁了的数量,最大为2
+    repeated CustomTacticPB pages = 5;      // 三套自定义战术页信息列表
+}
+
+// 激活战术
+message ActivateTacticReq {
+    int32 tacticId = 1;                      // 战术ID
+}
+message ActivateTacticRes {
+    sint32 ret = 1;                          // 状态码
+}
+
+// 设置保存战术
+message SettingTacticReq {
+    CustomTacticPB setting  = 1;            // 设置内容
+}
+message SettingTacticRes {
+    sint32 ret = 1;                         // 状态码
+}
