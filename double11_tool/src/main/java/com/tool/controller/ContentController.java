@@ -1,10 +1,7 @@
 package com.tool.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tool.bean.ResultInfo;
-import com.tool.bean.TableCell;
-import com.tool.bean.TableColumn;
-import com.tool.bean.TableData;
+import com.tool.bean.*;
 import com.tool.dao.CommonDao;
 import com.tool.util.CommonUtil;
 import com.tool.util.FileUtil;
@@ -12,7 +9,10 @@ import com.tool.util.JdbcUtil;
 import com.tool.websocket.OneWebSocket;
 import com.tool.websocket.WebSocketManager;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -377,7 +376,7 @@ public class ContentController {
         for (Map<String, Object> map : columnsInfo) {
             Object columnName = map.get("column_name");
             stringBuffer.append("`").append(columnName).append("`,");
-            String o = (String) dataMap.get(columnName);
+            String o =  String.valueOf(dataMap.get(columnName));
             String s = o.replace("'", "\\\'");
             values.append("'").append(s).append("',");
         }
@@ -387,5 +386,45 @@ public class ContentController {
         stringBuffer.append(values.toString());
         stringBuffer.append(")");
         commonDao.execute(jdbcTemplate, stringBuffer.toString());
+    }
+
+    @RequestMapping("getAllTables")
+    public List<Map<String, Object>> getAllTables() {
+        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc();
+        return commonDao.getAllTables(jdbcTemplate);
+    }
+
+    @RequestMapping("deleteTableData")
+    public void deleteTableData(String  row,String tableName) {
+        Map dataMap = JSONObject.parseObject(row, Map.class);
+        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc();
+        List<Map<String, Object>> columnsInfo = commonDao.tableColumnsInfo(jdbcTemplate, tableName);
+        StringBuilder stringBuffer = new StringBuilder("delete from  "+tableName+" where 1 = 1 ");
+        StringBuilder values = new StringBuilder();
+        for (Map<String, Object> map : columnsInfo) {
+            Object columnName = map.get("column_name");
+            stringBuffer.append(" and `").append(columnName).append("` = ");
+            String o =  String.valueOf(dataMap.get(columnName));
+            String s = o.replace("'", "\\\'");
+            stringBuffer.append("'").append(s).append("'");
+        }
+        commonDao.execute(jdbcTemplate, stringBuffer.toString());
+    }
+
+    @RequestMapping("getTableData")
+    public QueryData getTableData(@RequestParam String page,@RequestParam String pageRow,@RequestParam String tableName) {
+        QueryData queryData = new QueryData();
+        String dbSql = "select * from "+tableName;
+        JdbcTemplate defaultDataJdbc = JdbcUtil.getDefaultDataJdbc();
+        PageList pageList = commonDao.queryPage(defaultDataJdbc, dbSql, Integer.parseInt(page), Integer.parseInt(pageRow));
+        queryData.setPageList(pageList);
+        List<Map<String, Object>> columns = commonDao.tableColumnsInfo(defaultDataJdbc, tableName);
+        List<Object> columnNames = new ArrayList<>();
+        for (Map<String, Object> map : columns) {
+                Object columnName = map.get("column_name");
+            columnNames.add(columnName);
+        }
+        queryData.setColumns(columnNames);
+        return queryData;
     }
 }

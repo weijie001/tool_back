@@ -27,6 +27,11 @@ public class CommonDao {
         return template.queryForList(sql);
     }
 
+    public List<Map<String, Object>> getAllTables(JdbcTemplate template) {
+        String sql = "select `table_name` from information_schema.`TABLES` WHERE TABLE_SCHEMA = 'd11_data_dev'";
+        return template.queryForList(sql);
+    }
+
     public List<Map<String, Object>> tableData(JdbcTemplate template, String sql) {
        return   template.queryForList(sql);
     }

@@ -24,11 +24,9 @@ public class ConfigController {
 
     @Value("${file.path}")
     public  String projectDir;
-
     @Autowired
     private TestAccountDao testAccountDao;
-    @Autowired
-    private TestService testService;
+
     @RequestMapping("uploadFile")
     public boolean uploadFile(@RequestParam String dir, @RequestParam("file") MultipartFile file) {
         return FileUtil.upload(file, dir, projectDir);
