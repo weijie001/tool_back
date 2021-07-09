@@ -20,7 +20,7 @@ public class ItemDao {
     @Autowired
     protected ItemMapper itemMapper;
     public List<Item> getItems(JdbcTemplate template,String name) {
-        String sql = "select * from t_item where name like '%"+name+"%'";
+        String sql = "select * from t_item where name like '%"+name+"%' or item_id = '"+name+"'";
         return template.query(sql, itemMapper);
     }
 

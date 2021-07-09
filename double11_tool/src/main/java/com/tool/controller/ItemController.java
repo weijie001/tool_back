@@ -9,6 +9,7 @@ import com.tool.dao.TeamDao;
 import com.tool.manage.JdbcManage;
 import com.tool.util.CommonUtil;
 import com.tool.util.FileUtil;
+import com.tool.util.JdbcUtil;
 import com.tool.util.PoiUtils;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.ss.usermodel.*;
@@ -40,12 +41,13 @@ public class ItemController {
     private CommonDao commonDao;
     @RequestMapping("/getItems")
     public List<Item> getItems(@RequestParam String name) {
-        JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy("d11_001", JdbcInfo.MARK_DATA);
+        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc();
         return itemDao.getItems(jdbcTemplate,name);
     }
     @RequestMapping("/addItems")
     public boolean addItems(@RequestParam String teamId,@RequestParam List<Integer> itemIds,@RequestParam int num) {
-        JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy("d11_001", JdbcInfo.MARK_GAME);
+        //JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy("d11_001", JdbcInfo.MARK_GAME);
+        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultGameJdbc();
         Map<String, Object> teamInfo = teamDao.getTeamInfo(jdbcTemplate, teamId);
         if (teamInfo == null) {
             return false;
@@ -62,25 +64,9 @@ public class ItemController {
         return true;
     }
 
-    @RequestMapping("/test")
-    public List<Map<String, Object>> dataList() {
-        JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy("d11_001", JdbcInfo.MARK_DATA);
-        String tableName = "t_agent_activity_rule";
-        List<Map<String, Object>> rule = commonDao.tableColumnsInfo(jdbcTemplate, tableName);
-        String sql = "select ";
-        for (Map<String, Object> map : rule) {
-            sql = sql + "`"+map.get("column_name") + "`,";
-        }
-        sql = sql.substring(0, sql.length() - 1);
-        sql  =sql+" from "+tableName;
-        System.out.println("sql = " + sql);
-        return commonDao.tableData(jdbcTemplate,sql);
-    }
-
-
     @RequestMapping("/getTables")
     public List<Map<String, Object>> tables(@RequestParam String tableName) {
-        JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy("d11_001", JdbcInfo.MARK_DATA);
+        JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy("d11_001", JdbcInfo.MARK_GAME);
         return commonDao.tables(jdbcTemplate,tableName);
     }
 
@@ -88,7 +74,7 @@ public class ItemController {
     public void exportData(@RequestParam String tableStr,HttpServletResponse res) throws ParseException {
         System.out.println("tableStr = " + tableStr);
         String[] tables = tableStr.split(",");
-        JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy("d11_001", JdbcInfo.MARK_DATA);
+        JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy("d11_001", JdbcInfo.MARK_GAME);
         Workbook workbook = new XSSFWorkbook();
         CellStyle setBorder = workbook.createCellStyle();
         setBorder.setBorderBottom(HSSFCellStyle.BORDER_THIN); //下边框
@@ -167,6 +153,20 @@ public class ItemController {
         }
         File file = PoiUtils.createExcelFile(workbook, "sss");
         FileUtil.downloadFile(res, file, file.getName());
+    }
 
+    @RequestMapping("/test")
+    public List<Map<String, Object>> dataList() {
+        JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy("d11_001", JdbcInfo.MARK_DATA);
+        String tableName = "t_agent_activity_rule";
+        List<Map<String, Object>> rule = commonDao.tableColumnsInfo(jdbcTemplate, tableName);
+        StringBuilder sql = new StringBuilder("select ");
+        for (Map<String, Object> map : rule) {
+            sql.append("`").append(map.get("column_name")).append("`,");
+        }
+        sql = new StringBuilder(sql.substring(0, sql.length() - 1));
+        sql.append(" from ").append(tableName);
+        System.out.println("sql = " + sql);
+        return commonDao.tableData(jdbcTemplate, sql.toString());
     }
 }

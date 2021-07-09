@@ -14,6 +14,7 @@ message LeagueInfoRes{
     sint32    league_id = 2;//当前联赛
     repeated LeagueMatchInfoPB match_info = 3;//赛程
     repeated  LeagueRankPB    ranks = 4;//积分榜
+    bool end = 5;//联赛是否结束
 }
 
 message LeagueMatchInfoPB{
@@ -32,6 +33,8 @@ message LeagueMatchInfoPB{
     sint32    score = 13;//积分
     sint32    max_score = 14;//最高积分
     repeated   ItemAwardPB item_awards= 15;//奖励
+    sint32 seq = 16;//关卡ID
+    sint32 difficulty = 17;//难度
 }
 //积分排名
 message LeagueRankRes {
@@ -39,7 +42,7 @@ message LeagueRankRes {
     repeated  LeagueRankPB    ranks = 2;//积分排名
     repeated  LeaguePlayerRankPB    score_ranks = 3;//射手榜
     repeated  LeaguePlayerRankPB    assist_ranks = 4;//助攻榜
-
+    repeated  LeagueBestRecordPB    best_records = 5;//联赛最佳记录
 }
 
 message LeagueRankPB {
@@ -60,6 +63,13 @@ message LeaguePlayerRankPB {
     sint32    assists = 4;//助攻
 }
 
+message LeagueBestRecordPB {
+    sint32    league_id = 1;//联赛ID
+    string    rank = 2;//p
+    sint32    win = 3;//胜
+    sint32    draw = 4;//平
+    sint32    lose = 5;//负
+}
 //联赛事件回包
 message LeagueGainAwardRes {
     sint32    ret = 1;//ret

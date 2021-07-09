@@ -117,8 +117,14 @@ public class ContentController {
             int physicalNumberOfCells = firstRow.getPhysicalNumberOfCells();
             StringBuilder sqlBefore = new StringBuilder("replace into ");
             sqlBefore.append(tableName).append("(");
+            List<String> excelColumns = new ArrayList<>();
             for (int j = 0; j < physicalNumberOfCells; j++) {
+                if (firstRow.getCell(j) == null) {
+                    break;
+                }
                 String str = firstRow.getCell(j).getStringCellValue();
+                excelColumns.add(str);
+                str = str.replace("[I18N]", "");
                 if (columnNames.contains(str)) {
                     columnNames2.add(str);
                     sqlBefore.append("`").append(str).append("`,");
@@ -135,12 +141,15 @@ public class ContentController {
 
             }
             if (columnNames.size() > columnNames2.size()) {
-                errors.add(tableName+":database has more data");
+                List<String> collect1 = columnNames.stream().map(String::valueOf).collect(Collectors.toList());
+                List<String> collect2 = columnNames2.stream().map(String::valueOf).collect(Collectors.toList());
+                List<Object> collect = collect1.stream().filter(t->!collect2.contains(t)).collect(Collectors.toList());
+                errors.add(tableName+":database has more data:"+collect);
                 break;
             }
             List<Integer> primaryKeysIndex = new ArrayList<>();
-            for (int j = 0; j < columnNames.size(); j++) {
-                if(primaryKeys.contains(columnNames2.get(j))){
+            for (int j = 0; j < excelColumns.size(); j++) {
+                if(primaryKeys.contains(excelColumns.get(j))){
                     primaryKeysIndex.add(j);
                 }
             }
@@ -157,14 +166,22 @@ public class ContentController {
                 boolean has= true;
                 List<Map<String, Object>> collect = maps;
                 int match = 0;
+                boolean isEnd = false;
                 for (Integer index:primaryKeysIndex){
                     match = findMatch(errorIndex, Math.max(match,index));
                     Cell cell = r.getCell(match);
                     match++;
+                    if (cell == null) {
+                        isEnd = true;
+                        break;
+                    }
                     cell.setCellType(Cell.CELL_TYPE_STRING);
-                    String columnName = (String) columnNames2.get(index);
+                    String columnName = (String) excelColumns.get(index);
                     String value = cell.getStringCellValue();
                     collect = collect.stream().filter(t -> String.valueOf(t.get(columnName)).equals(value)).collect(Collectors.toList());
+                }
+                if (isEnd) {
+                    break;
                 }
                 if (CollectionUtils.isEmpty(collect)) {
                     //这是一条新数据
@@ -176,7 +193,8 @@ public class ContentController {
                 //List<TableCell> tableRow = new ArrayList<>();
                 boolean isChanged = false;
                 int index = 0;
-                for (int k = 0; k < physicalNumberOfCells; k++) {
+                int max = Math.min(physicalNumberOfCells, excelColumns.size());
+                for (int k = 0; k < max; k++) {
                     if (!errorIndex.contains(k)) {
                         TableCell tableCell = new TableCell();
                         Cell cell = r.getCell(k);
