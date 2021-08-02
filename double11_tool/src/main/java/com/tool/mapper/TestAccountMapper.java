@@ -15,7 +15,6 @@ public class TestAccountMapper  implements RowMapper<TestAccount> {
         TestAccount bean = new TestAccount();
         bean.setId(resultSet.getInt("id"));
         bean.setAccount(resultSet.getString("account"));
-        bean.setToken(resultSet.getString("token"));
         bean.setEnv(resultSet.getString("env"));
         return bean;
     }

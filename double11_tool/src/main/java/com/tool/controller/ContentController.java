@@ -167,6 +167,7 @@ public class ContentController {
                 List<Map<String, Object>> collect = maps;
                 int match = 0;
                 boolean isEnd = false;
+                Map<String, String> hasD = new HashMap<>();
                 for (Integer index:primaryKeysIndex){
                     match = findMatch(errorIndex, Math.max(match,index));
                     Cell cell = r.getCell(match);
@@ -176,8 +177,9 @@ public class ContentController {
                         break;
                     }
                     cell.setCellType(Cell.CELL_TYPE_STRING);
-                    String columnName = (String) excelColumns.get(index);
+                    String columnName = excelColumns.get(index);
                     String value = cell.getStringCellValue();
+                    hasD.put(columnName, value);
                     collect = collect.stream().filter(t -> String.valueOf(t.get(columnName)).equals(value)).collect(Collectors.toList());
                 }
                 if (isEnd) {
@@ -186,6 +188,19 @@ public class ContentController {
                 if (CollectionUtils.isEmpty(collect)) {
                     //这是一条新数据
                     has = false;
+                }else{
+                    maps = maps.stream().filter(t->{
+                        boolean rr = false;
+                        for (Map.Entry<String,String> entry : hasD.entrySet()) {
+                            String key = entry.getKey();
+                            String value = entry.getValue();
+                            if (!String.valueOf(t.get(key)).equals(value)) {
+                                rr = true;
+                                break;
+                            }
+                        }
+                        return rr;
+                    }).collect(Collectors.toList());
                 }
                 Map<String, Object> rowMap = collect.stream().findFirst().orElse(null);
 
@@ -263,6 +278,26 @@ public class ContentController {
                 }
             }
             sqlList.add("");
+
+//            for (int k = 0; k < maps.size();k++) {
+//                Map<String, Object> stringObjectMap = maps.get(k);
+//                StringBuilder deleteSql = new StringBuilder("delete  from " + tableName + " where 1=1");
+//                TableColumn tableColumn = new TableColumn();
+//                for (Map.Entry<String, Object> entry : stringObjectMap.entrySet()) {
+//                    TableCell tableCell = new TableCell();
+//                    String key = entry.getKey();
+//                    Object value = entry.getValue();
+//                    if(primaryKeys.contains(key)){
+//                        deleteSql.append(" and `").append(key).append("` = '").append(value).append("'");
+//                    }
+//                    tableCell.setKey(key);
+//                    tableCell.setValue(String.valueOf(value));
+//                    tableCell.setTag(2);
+//                    tableColumn.getCells().add(tableCell);
+//                }
+//                tableData.getData().add(tableColumn);
+//                sqlList.add(deleteSql.toString());
+//            }
             myData.add(tableData);
         }
         String sqlName=null;
@@ -277,14 +312,6 @@ public class ContentController {
                 System.out.println("sqlPath = " + sqlPath);
                 for (String sql : sqlList) {
                     bw.write(sql + "\n");
-                    if (!StringUtils.isEmpty(sql)) {
-                        try {
-                            //commonDao.execute(jdbcTemplate,sql);
-                        } catch (Exception e) {
-                            errors.add(e.getMessage());
-                            e.printStackTrace();
-                        }
-                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -387,24 +414,37 @@ public class ContentController {
     @RequestMapping("executeSql")
     public void executeSql(String  row,String tableName) {
         Map dataMap = JSONObject.parseObject(row, Map.class);
+        Object test = dataMap.get("test");
+        boolean isDelete = String.valueOf(test).contains("2");
         JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc();
         List<Map<String, Object>> columnsInfo = commonDao.tableColumnsInfo(jdbcTemplate, tableName);
-        StringBuilder stringBuffer = new StringBuilder("replace into "+tableName+"(");
+        StringBuilder stringBuffer = new StringBuilder("replace into " + tableName + "(");
+        StringBuilder deleteSql = new StringBuilder("delete from " + tableName + " where 1 = 1 ");
         StringBuilder values = new StringBuilder();
         for (Map<String, Object> map : columnsInfo) {
             Object columnName = map.get("column_name");
-            stringBuffer.append("`").append(columnName).append("`,");
-            String o =  String.valueOf(dataMap.get(columnName));
+            String o = String.valueOf(dataMap.get(columnName));
             String s = o.replace("'", "\\\'");
-            values.append("'").append(s).append("',");
+            if (isDelete) {
+                deleteSql.append(" and `").append(columnName).append("`='").append(s).append("'");
+            } else {
+                stringBuffer.append("`").append(columnName).append("`,");
+                values.append("'").append(s).append("',");
+            }
         }
-        stringBuffer = new StringBuilder(stringBuffer.substring(0, stringBuffer.length() - 1));
-        values = new StringBuilder(values.substring(0, values.length() - 1));
-        stringBuffer.append(") values(");
-        stringBuffer.append(values.toString());
-        stringBuffer.append(")");
-        commonDao.execute(jdbcTemplate, stringBuffer.toString());
+        if (!isDelete) {
+            stringBuffer = new StringBuilder(stringBuffer.substring(0, stringBuffer.length() - 1));
+            values = new StringBuilder(values.substring(0, values.length() - 1));
+            stringBuffer.append(") values(");
+            stringBuffer.append(values.toString());
+            stringBuffer.append(")");
+            commonDao.execute(jdbcTemplate, stringBuffer.toString());
+        }else {
+            commonDao.execute(jdbcTemplate, deleteSql.toString());
+        }
     }
+
+
 
     @RequestMapping("getAllTables")
     public List<Map<String, Object>> getAllTables() {

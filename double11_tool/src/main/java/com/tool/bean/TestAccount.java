@@ -3,7 +3,6 @@ package com.tool.bean;
 public class TestAccount {
     private int id;
     private String account;
-    private String token;
     private String env;
 
     public int getId() {
@@ -20,14 +19,6 @@ public class TestAccount {
 
     public void setAccount(String account) {
         this.account = account;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     public String getEnv() {

@@ -53,4 +53,20 @@ public class OkhttpUtils {
         }
         return result;
     }
+
+    public static byte[] post2(String url,byte[] input) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(outputStream);
+        if (input != null) {
+            dos.write(input);
+        }
+        byte[] result = null;
+        RequestBody requestBody2 = RequestBody.create(MediaType.parse("application/x-protobuf"),outputStream.toByteArray());
+        Request request2 = new Request.Builder().url(url).addHeader("Accept","application/x-protobuf").post(requestBody2).build();
+        Response response2 = okHttpClient.newCall(request2).execute();
+        if (response2.isSuccessful()) {
+            result= response2.body().bytes();
+        }
+        return result;
+    }
 }

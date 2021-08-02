@@ -91,6 +91,11 @@
             <artifactId>jep</artifactId>
             <version>2.24</version>
         </dependency>
+        <dependency>
+            <groupId>net.galasports.account</groupId>
+            <artifactId>account-bean</artifactId>
+            <version>2.3.6-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>

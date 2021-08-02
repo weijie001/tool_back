@@ -8,15 +8,19 @@ import com.tool.bean.FileNameInfo;
 import com.tool.bean.FileTypeEnum;
 import com.tool.dao.TeamDao;
 import com.tool.file.FileToolUtil;
+import com.tool.http.OkhttpUtils;
 import com.tool.http.RequestComponent;
 import com.tool.poi.ExcelUtil;
 import com.tool.util.JdbcUtil;
 import com.tool.util.ShellUtil;
+import net.galasports.account.bean.ErrorCode;
+import net.galasports.account.bean.protocol.UserProtos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -95,11 +100,21 @@ public class JkTestController {
 
     @GetMapping("/getData")
     public String getData(@RequestParam String req, @RequestParam String res, @RequestParam String uri, @RequestParam(defaultValue = "{}") String data,
-                          @RequestParam String account, @RequestParam String token, @RequestParam String env) throws Exception {
+                          @RequestParam String account, @RequestParam String env) throws Exception {
         log.info("login!");
-        login(account,token,env);
+        String url = "http://"+env+"/";
+        UserProtos.LoginReq.Builder loginReq = UserProtos.LoginReq.newBuilder();
+        loginReq.setAccount(account);
+        loginReq.setPwd(DigestUtils.md5DigestAsHex("123456".getBytes(StandardCharsets.UTF_8)));
+        loginReq.setMac("");
+        loginReq.setIdfa("");
+        loginReq.setGameTypeId(5);
+        loginReq.setSystem("HarmonyOS");
+        byte[] bytes = OkhttpUtils.post2("http://192.168.1.114:8087/userC/login/", loginReq.build().toByteArray());
+        UserProtos.UserRes userRes = UserProtos.UserRes.parseFrom(bytes);
+        login(userRes.getAccountId(),userRes.getToken(),url);
         log.info("get data!");
-        return send(uri, req, res, data,env);
+        return send(uri, req, res, data,url);
     }
 
     @GetMapping("/getTeamInfo")
@@ -107,6 +122,48 @@ public class JkTestController {
         JdbcTemplate devGameJdbc = JdbcUtil.getDefaultGameJdbc();
         return   teamDao.getTeamInfo(devGameJdbc, teamId);
     }
+    @GetMapping("/loginValid2")
+    public String loginValid2(@RequestParam String account,@RequestParam String env) throws Exception {
+        log.info("login!");
+        UserProtos.LoginReq.Builder loginReq = UserProtos.LoginReq.newBuilder();
+        loginReq.setAccount(account);
+        loginReq.setPwd(DigestUtils.md5DigestAsHex("123456".getBytes(StandardCharsets.UTF_8)));
+        loginReq.setMac("");
+        loginReq.setIdfa("");
+        loginReq.setGameTypeId(5);
+        loginReq.setSystem("HarmonyOS");
+        byte[] bytes = OkhttpUtils.post2("http://192.168.1.114:8087/userC/login/", loginReq.build().toByteArray());
+        UserProtos.UserRes res = UserProtos.UserRes.parseFrom(bytes);
+        if (ErrorCode.SUCCESS.code() != res.getRet()) {
+            UserProtos.RegisterReq.Builder registerReq = UserProtos.RegisterReq.newBuilder();
+            registerReq.setAccount(account);
+            registerReq.setPwd(DigestUtils.md5DigestAsHex("123456".getBytes(StandardCharsets.UTF_8)));
+            registerReq.setAndroididUuid(DigestUtils.md5DigestAsHex(account.getBytes(StandardCharsets.UTF_8)));
+            registerReq.setChannel("SLI");
+            registerReq.setChannelInfo("LI_ANDROID");
+            registerReq.setClientSystemVersion("");
+            registerReq.setClientVersion("1000000");
+            registerReq.setCode("");
+            registerReq.setDeviceInfoJson("");
+            registerReq.setFullChannel("LI_ANDROID@@@LI");
+            registerReq.setGameType(5);
+            registerReq.setIdCard("");
+            registerReq.setIdfa("");
+            registerReq.setImeiIdfa(DigestUtils.md5DigestAsHex(account.getBytes(StandardCharsets.UTF_8)));
+            registerReq.setMac("");
+            registerReq.setNameCard("");
+            registerReq.setPhoneModel("");
+            registerReq.setPhoneName("");
+            registerReq.setPhoneNumber("");
+            registerReq.setPhoneSn("");
+            registerReq.setSystem("HarmonyOS");
+            byte[] registerByte = OkhttpUtils.post2("http://192.168.1.114:8087/userC/register/", registerReq.build().toByteArray());
+            res = UserProtos.UserRes.parseFrom(registerByte);
+        }
+        String url = "http://"+env+"/";
+        return login(res.getAccountId(),res.getToken(),url);
+    }
+
     @GetMapping("/loginValid")
     public String loginValid(@RequestParam String account, @RequestParam String token, @RequestParam String env) throws Exception {
         log.info("login!");
@@ -149,7 +206,8 @@ public class JkTestController {
         Class<?> loginResClass = Class.forName(strPrefix + "LoginProtos$LoginRes");
         Method method = RequestComponent.getMethod(loginReqClass, "newBuilder", null);
         Message.Builder messageOrBuilder = (Message.Builder) method.invoke(loginReqBuildClass);
-        String jsonFormat = "{channel:\"SLI\",account_id:\""+account+"\",token:\""+token+"\",server_id:\"double11_001\"}";
+        String jsonFormat = "{" +
+                ":\"SLI\",account_id:\""+account+"\",token:\""+token+"\",server_id:\"double11_001\"}";
         JsonFormat.merge(jsonFormat, messageOrBuilder);
         RequestComponent requestComponent = new RequestComponent(messageOrBuilder.build(),env);
         return requestComponent.exec("loginC/login", loginResClass);

@@ -2,19 +2,24 @@ package com.tool.controller;
 
 import com.tool.bean.TestAccount;
 import com.tool.dao.TestAccountDao;
+import com.tool.http.OkhttpUtils;
 import com.tool.service.TestService;
 import com.tool.util.FileUtil;
 import com.tool.util.ShellUtil;
+import net.galasports.account.bean.ErrorCode;
+import net.galasports.account.bean.protocol.UserProtos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RequestMapping("config")
@@ -38,8 +43,14 @@ public class ConfigController {
 
     @RequestMapping("addAccount")
     public int addAccount(@RequestParam String account,@RequestParam String token,@RequestParam String env) {
-        return testAccountDao.add(account,token,env);
+        return testAccountDao.add(account,env);
     }
+
+    @RequestMapping("addAccount2")
+    public int addAccount2(@RequestParam String account,@RequestParam String env) {
+        return testAccountDao.add(account,env);
+    }
+
     @RequestMapping("deleteAccount")
     public void deleteAccount(@RequestParam int id) {
         testAccountDao.delete(id);
