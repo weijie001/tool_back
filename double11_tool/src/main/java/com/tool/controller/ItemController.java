@@ -4,6 +4,7 @@ import com.tool.bean.Item;
 import com.tool.bean.ItemAward;
 import com.tool.bean.JdbcInfo;
 import com.tool.dao.CommonDao;
+import com.tool.dao.ConfigDao;
 import com.tool.dao.ItemDao;
 import com.tool.dao.TeamDao;
 import com.tool.manage.JdbcManage;
@@ -39,15 +40,19 @@ public class ItemController {
     private TeamDao teamDao;
     @Autowired
     private CommonDao commonDao;
+
+    @Autowired
+    ConfigDao configDao;
     @RequestMapping("/getItems")
     public List<Item> getItems(@RequestParam String name) {
-        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc();
+        String evnTag = configDao.getEvnTag();
+        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc(evnTag);
         return itemDao.getItems(jdbcTemplate,name);
     }
     @RequestMapping("/addItems")
     public boolean addItems(@RequestParam String teamId,@RequestParam List<Integer> itemIds,@RequestParam int num) {
-        //JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy("d11_001", JdbcInfo.MARK_GAME);
-        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultGameJdbc();
+        String evnTag = configDao.getEvnTag();
+        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultGameJdbc(evnTag);
         Map<String, Object> teamInfo = teamDao.getTeamInfo(jdbcTemplate, teamId);
         if (teamInfo == null) {
             return false;
@@ -66,7 +71,8 @@ public class ItemController {
 
     @RequestMapping("/getTables")
     public List<Map<String, Object>> tables(@RequestParam String tableName) {
-        JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy("d11_001", JdbcInfo.MARK_GAME);
+        String evnTag = configDao.getEvnTag();
+        JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy(evnTag, JdbcInfo.MARK_GAME);
         return commonDao.tables(jdbcTemplate,tableName);
     }
 
@@ -74,7 +80,8 @@ public class ItemController {
     public void exportData(@RequestParam String tableStr,HttpServletResponse res) throws ParseException {
         System.out.println("tableStr = " + tableStr);
         String[] tables = tableStr.split(",");
-        JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy("d11_001", JdbcInfo.MARK_GAME);
+        String evnTag = configDao.getEvnTag();
+        JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy(evnTag, JdbcInfo.MARK_DATA);
         Workbook workbook = new XSSFWorkbook();
         CellStyle setBorder = workbook.createCellStyle();
         setBorder.setBorderBottom(HSSFCellStyle.BORDER_THIN); //下边框
@@ -157,7 +164,8 @@ public class ItemController {
 
     @RequestMapping("/test")
     public List<Map<String, Object>> dataList() {
-        JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy("d11_001", JdbcInfo.MARK_DATA);
+        String evnTag = configDao.getEvnTag();
+        JdbcTemplate jdbcTemplate = JdbcManage.getTemplateBy(evnTag, JdbcInfo.MARK_DATA);
         String tableName = "t_agent_activity_rule";
         List<Map<String, Object>> rule = commonDao.tableColumnsInfo(jdbcTemplate, tableName);
         StringBuilder sql = new StringBuilder("select ");

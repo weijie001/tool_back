@@ -6,11 +6,12 @@ import "base.proto";
 package com.proto;
 
 message TeamLoginRes {
-    sint32                  ret = 1;//响应码
-    repeated TeamItemPB   items = 2;//道具列表
-    sint32 scout_count = 3;//球探最大数量
-    sint32 pve_Level = 4; // PVE联赛等级
-    sint32 pvp_level = 5; // PVP天梯等级
+    sint32 ret = 1;                 // 响应码
+    repeated TeamItemPB items = 2;  // 道具列表
+    sint32 scout_count = 3;         // 球探最大数量
+    LevelInfoPB pve_history = 4;    // PVE联赛历史最高等级信息
+    LevelInfoPB pvp_history = 5;    // PVP天梯历史最高等级信息
+    EnergyInfoPB energy = 6;        // 球队能量
 }
 
 message TeamFieldReq {
@@ -30,6 +31,7 @@ message TeamRes {
     sint32 ret = 1;
 }
 
+//gala币商店
 message GalaCurrencyExchangeRes{
     sint32 ret = 1;
     repeated GalaCurrencyPB gala_currency = 2;
@@ -39,4 +41,150 @@ message GalaCurrencyPB{
     sint32 price = 1;//gala币
     sint32 num = 2;//gala数量
     sint32 rmb = 3;//人名币
+}
+
+message BuyGalaCurrencyRes{
+    sint32 ret = 1;
+    ItemAwardPB award = 2;//道具
+}
+
+// 请求获取球队信息
+message TeamInfoReq {
+    string team_id = 1;                     // 需要查看的球队Id,请求自己球队可不传
+}
+message TeamInfoRes {
+    sint32 ret = 1;                         // 返回状态
+    string team_id = 2;                     // 球队Id
+    string team_name = 3;                   // 球队名称
+    BadgePB badge = 4;                      // 队徽
+    sint32 level = 5;                       // 球队等级
+    sint32 vip = 6;                         // 球队VIP等级
+    sint32 fight = 7;                       // 球队战斗力
+    repeated sint32 honors = 8;             // 获取得荣誉列表
+    PVPInfoPB pvp_info = 9;                 // pvp信息
+    sint32 squad_id = 10;                   // 阵型ID
+    repeated PlayersInfoPB starters = 11;   // 首发阵营球员,自己球队时返回空
+    repeated PlayersCultivatePB cultivates = 12; // 首发球员培养后属性,自己球队时返回空
+    sint32 relation = 13;                   // 查看其它球队时,与当前用户的关系 0,还不是好友 1,已经申请过了 2,已经是好友关系了
+}
+
+// 请求更换球队名称
+message ModifyTeamNameReq {
+    string team_name = 1;                   // 球队名称
+}
+message ModifyTeamNameRes {
+    sint32 ret = 1;                         // 返回状态
+}
+
+// 查询当前使用阵型的球号码列表
+message ShirtNumbersRes {
+    sint32 ret = 1;                         // 返回状态
+    repeated ShirtNumberPB shirt_number = 2;// 球衣号码列表
+}
+
+// 球衣号码编辑
+message ShirtNumberEditReq {
+    sint32 player_num = 1;                  // 编辑的球员编号
+    sint32 shirt_num = 2;                   // 设置的球衣号码
+}
+message ShirtNumberEditRes {
+    sint32 ret = 1;                         // 返回状态
+    repeated ShirtNumberPB shirt_number = 2;// 球衣号码列表
+}
+
+// 球衣背包
+message ShirtBackpackRes {
+    sint32 ret = 1;                         // 返回状态
+    repeated SoccerShirtPB shirts = 2;             // 已经获得的球衣Id列表
+}
+
+// 球衣设置
+message ShirtSetupReq {
+    sint32 home_shirt = 1;                  // 主队选择球衣id
+    sint32 away_shirt = 2;                  // 客队选择球衣id
+}
+message ShirtSetupRes {
+    sint32 ret = 1;                         // 返回状态
+    ShirtPB shirt = 2;
+}
+
+// 球馆商店购买
+message StadiumShopBuyReq {
+    sint32 shop_id = 1;                     // 商品Id
+}
+message StadiumShopBuyRes {
+    sint32 ret = 1;                         // 返回状态
+}
+
+// Tifo举牌背包
+message TifoBackpackRes {
+    sint32 ret = 1;                         // 返回状态
+    repeated sint32 tifos = 2;              // 已经获得的tifo和brand
+}
+
+// TIFO 设置
+message TifoSetupReq {
+    TifoBrandPB setup = 1;                  // 设置项
+}
+message TifoSetupRes {
+    sint32 ret = 1;                         // 返回状态
+    TifoBrandPB tifo = 2;
+}
+
+// 随机队徽
+message BadgeRandomRes {
+    sint32 ret = 1;                         // 返回状态
+    BadgePB badge = 2;                      // 设置项
+}
+
+// 队徽设置
+message BadgeSetupReq {
+    BadgePB setup = 1;                      // 设置项
+}
+message BadgeSetupRes {
+    sint32 ret = 1;                         // 返回状态
+    BadgePB badge = 2;                      // 设置项
+}
+
+// 更新新手引导步骤
+message UpdateGuideReq {
+    sint32 guide = 1;                       // 新手引导步骤
+}
+message UpdateGuideRes {
+    sint32 ret = 1;                         // 返回状态
+}
+
+// 请求球队能量信息
+message TeamEnergyRes {
+    sint32 ret = 1;                         // 返回状态
+    EnergyInfoPB energy = 2;                // 球队能量
+}
+
+// 自定义球衣
+message CustomShirtReq {
+    SoccerShirtPB setup = 1;                // 设置项
+}
+message CustomShirtRes {
+    sint32 ret = 1;                         // 返回状态
+    SoccerShirtPB shirt = 2;                // 球衣
+}
+
+// 球场背包
+message CourtBackpackRes {
+    sint32 ret = 1;                         // 返回状态
+    repeated SoccerCourtPB court = 2;                // 已经获得的球场列表
+}
+
+// 球场自定义设置
+message CourtSetupReq {
+    SoccerCourtPB setup = 1;                // 自定义
+}
+message CourtSetupRes {
+    sint32 ret = 1;                         // 返回状态
+    SoccerCourtPB court = 2;                // 球场设置
+}
+
+// 刷新各种货币
+message RefreshCoinRes {
+    repeated ItemAwardPB coins = 1;         // 币类值列表
 }

@@ -24,7 +24,7 @@ message SatisfactionAwardPB{
 
 //任务列表
 message TeamMissionReq{
-    sint32 mission_type = 1;//任务类型
+    sint32 mission_type = 1;//任务类型   1 2 4
 }
 
 message TeamMissionRes{

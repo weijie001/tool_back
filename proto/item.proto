@@ -6,14 +6,12 @@ import "base.proto";
 package com.proto;
 
 
-// 使用道具请求
-message ItemUseReq{
+message ItemReq{
     sint32      item_id = 1; //使用道具id
     sint32      item_num = 2; //使用道具的数量
 }
 
-//使用道具回包
-message ItemUseRes{
+message ItemRes{
     sint32          ret = 1;//响应码
     repeated        ItemAwardPB    items = 2;//奖励资源
 }

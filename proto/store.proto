@@ -19,6 +19,8 @@ message StoreGiftRes{
     sint32      ret        =1;
     repeated    StoreGifts   store_gifts    =2;
     sint64  end_time        =3;//下一次自动刷新时间戳
+    ItemAwardPB item_award = 4;//刷新消耗资源
+    sint32 consume = 5;//刷新需要消耗gala币数量
 }
 
 message StoreGifts{

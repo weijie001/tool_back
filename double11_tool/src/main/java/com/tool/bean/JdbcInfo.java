@@ -137,7 +137,6 @@ public class JdbcInfo{
         dateSource.setMaxWaitMillis(3000);
         dateSource.setMaxTotal(10);
         dateSource.setMaxIdle(10);
-        //dateSource.setTransactionQueryTimeout(300);
         try {
             dateSource.getLogWriter();
         } catch (SQLException throwables) {

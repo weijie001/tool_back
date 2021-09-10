@@ -20,16 +20,15 @@ message BatchAddFriendReq {
 }
 
 message FriendRes {
-  string teamId = 1;                          // 球队id
-  string accountId = 2;                       // 账号中心记录的唯一标识
-  string teamName = 3;                        // 球队名字
-  sint32 level = 4;                           // 等级
-  string headPortrait = 5;                    // 用户头像
-  string headPortraitFrame = 6;               // 用户头像框
+  string team_id = 1;                         // 球队id
+  string team_name = 2;                       // 球队名字
+  BadgePB badge = 3;                          // 队徽
+  sint32 level = 4;                           // 球队等级
+  sint32 fight = 5;                           // 战力
+  repeated sint32 honors = 6;                 // 获取得荣誉列表
   sint64 lastLoginTime = 7;                   // 最后登录时间
-  sint32 relation = 8;// 好友和当前用户的关系 0,还不是好友 1,已经申请过了 2,已经是好友关系了
-  sint32 cap = 9;//战力
-  repeated sint32 medals=10;//勋章
+  bool online = 8;                            // 是否在线
+  sint32 relation = 9;                        // 好友和当前用户的关系 0,还不是好友 1,已经申请过了 2,已经是好友关系了
 }
 
 message BlacklistRes {

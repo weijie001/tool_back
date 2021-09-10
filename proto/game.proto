@@ -6,23 +6,152 @@ option java_outer_classname = "GameProtos";
 import "base.proto";
 package com.proto;
 
+// 比赛开始
+message BeginGameReq {
+    sint32 seq = 1;//关卡ID
+}
+message BeginGameRes {
+    sint32 ret = 1;
+    repeated GameGoalPb team_game_goals = 2;//特殊比赛玩家进球
+    repeated GameGoalPb ai_game_goals = 3;//特殊比赛ai进球
+    EnergyInfoPB energy = 4; // 球队能量
+}
+message GameGoalPb{
+    sint32 goal_time = 1;//进球时间
+    sint32 team_player_num = 2;//进球球员num
+    bool is_assist = 3;// 是否有助攻
+    sint32 assist_team_player_num = 4;//助攻球员num
+}
 //比赛结束
 message EndGameReq{
-    sint32                        score = 1;
-    sint32                        club_score = 2;
-    sint32 team_type = 3;//1 主队 2客队
-    repeated GamePlayerResult players = 4;
-    repeated GamePlayerResult club_players = 5;
-    sint32 end_type = 6;//结束类型 0正常结束 1放弃
+    sint32 end_type = 1;//结束类型 0正常结束 1放弃
+    sint32 seq = 2;//关卡ID
+    sint32 point = 3;//技巧挑战积分
+    sint32 game_time = 4; //客户端从本场开始到此刻已比赛的游戏时长
+    repeated PlayerEndState players = 5; // 结束时球员状态
 }
 
-message GamePlayerResult{
-    sint32 player_id = 1;
-    sint32 team_player_num = 2;
-    sint32 score = 3;
-    sint32 assist = 4;
+//比赛事件
+message GameEventReq{
+    sint32 event_type = 1;// 事件类型 1:进球;2:红牌;3:抢断;4:铲球;5:扑救;6:传中
+    sint32 team_player_num = 2;//进球球员num
+    sint32 assist_team_player_num = 3;//助攻球员num
+    string team_id = 4; // 触发事件的球队ID
+    sint32 event_time = 5; //事件发生时从开始到此刻的比赛游戏时长
+    sint32 goal_way = 6;//进球方式 1点球;2任意球;3远射（禁区外）;4不同距离的远射;5一脚射门;6头球;7乌龙球
+    sint32 distance = 7;//离球门的距离(不同距离的远射进球)
+    sint32 half = 8;//1:上半场;2:下半场
 }
+
+message GameEventRes{
+    sint32 ret = 1;//1 进球
+}
+
+
+//比赛结束
+message PvpEndGameReq{
+    sint32 game_id = 1;
+    repeated PlayerEndState players = 2;
+}
+message PvpEndGameRes{
+    sint32  ret = 1;//ret
+    sint32  goal = 2;//进球数
+    sint32  grade = 3;//段位
+    sint32  star = 4;//星级
+    sint32 fumble=5;//失球数
+    repeated PlayerEndState stamina = 6;// 上场球员体力消耗变动
+    string opponents_team_name = 7;//对手球队名
+}
+
+// 球员比赛结束后的状态
+// *体力字段：
+//    1）客户端上报时为球员所剩体力(为正)
+//    2）服务器返回时该值为体力恢复计算后最终消耗的值(为负)
+//    3）球员体力属性需要特殊处理 = 基础属性+成长属性+该结构stamina(为负)
+message PlayerEndState {
+    sint32 player_num = 1;                  // 球员唯一编号
+    sint32 stamina = 2;                     // 所剩余体力或消耗体力
+}
+
 message EndGameRes{
-    sint32                        ret = 1;//ret
-    repeated     ItemAwardPB            award_items = 7;//产出的资源
+    sint32 ret = 1;                         // ret
+    repeated ItemAwardPB award_items = 2;   // 产出的资源
+    repeated SkillChallengeAward skill_challenge_award =3;//技巧挑战奖励
+    repeated ExpAwardPB award_exps = 4;     // 产出经验列表
+    sint32  home_score = 5;                 // 主队比分
+    sint32  away_score = 6;                 // 客队比分
+    repeated PlayerEndState stamina = 7;    // 上场球员体力消耗变动
+}
+
+
+
+message SkillChallengeAward{
+    sint32 star = 1;//多少星奖励
+    sint32 status   =  2; //奖励领取状态 1 未完成 2 已领取
+}
+
+message PvpGameInfosRes{
+    sint32 ret = 1;
+    string ip = 2;//匹配服
+    sint32 port =3;//端口
+    PvpGameInfoPB pvp_game_info = 4;
+}
+
+message PvpGameInfoPB{
+    sint32 game_id = 1;//1:天梯;2:撮合;3:好友对战(输入房间号)
+    sint64 begin_time = 2;//开始时间
+    sint64 end_time = 3;//结束时间
+    sint32 grade = 4;//段位
+    sint32 star = 5;//星数
+    sint32 win = 6;//赢
+    sint32 draw = 7;//平
+    sint32 lose = 8;//输
+    repeated PvpGameAward team_pvp_game_awards = 9;//奖励段位
+}
+
+message PvpGameAward{
+    sint32 grade = 1;//段位
+    sint32 status = 2;//领取状态
+}
+
+message PvpGainAwardReq{
+    sint32 game_id = 1;//游戏ID
+    sint32 grade = 2;//段位
+}
+
+// PVP开房间匹配
+message PvpCreateRoomReq {
+    sint32 game_id = 1;//游戏ID
+    sint32 group_way = 2;// 组队方式 > 1为开黑
+}
+message PvpCreateRoomRes{
+    sint32 ret = 1;//响应码
+    string ip = 2;//ip
+    sint32 port = 3;//端口
+}
+
+// 附近PVP匹配房间
+message PvpNearbyRoomReq {
+    sint32 condition = 1;   // 条件
+}
+message PvpNearbyRoomRes {
+    sint32 ret = 1;//响应码
+    repeated GroupRoomPB rooms =2 ; // 房间列表
+}
+
+// 经验奖励
+message ExpAwardPB {
+    sint32 player_num = 1;  // 球员编号
+    sint32 add_exp = 2;     // 增加的经验值
+    sint32 cur_level = 3;   // 当前的等级
+    sint32 cur_exp = 4;     // 当前的经验值
+}
+
+// 组队房间信息
+message GroupRoomPB {
+    sint32 game_id = 1;         // 玩法Id
+    sint32 group_way = 2;       // 组队方式
+    string homeowner_id = 3;    // 房主ID
+    string server_ip = 4;       // 服务器所在地址
+    sint32 server_port = 5;     // 服务器端口
 }

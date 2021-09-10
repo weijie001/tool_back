@@ -3,7 +3,7 @@ syntax = "proto3";
 option java_package = "net.galasports.demo.protocol";
 option java_outer_classname = "LoginProtos";
 import "base.proto";
-
+import "game/match.proto";
 package com.proto;
 
 message LoginReq {
@@ -22,12 +22,29 @@ message LoginRes {
     sint64 loginTime = 2; //登录时间戳
     string serverId = 3; //服务器信息，表示哪一台服务
     string team_id = 4; //是否是初始创建 球队， 1表示 初始创建球队
-    string team_name = 5;
-    repeated PlayersInfoPB players = 6;
+    string team_name = 5; // 球队名
+    repeated PlayersInfoPB players = 6; // 球员基础信息
     sint32 gold = 7;//金币
-    sint32 strength = 8;//实力
-    sint32 badgeId = 9; //使用的队徽
+    sint32 fight = 8;//战斗力
     CustomSquadPB squad_page = 10;// 当前使用阵形
+    repeated PlayersCultivatePB cultivates = 11; // 球员培养属性
+    sint32 lucky_num = 12;//球探幸运值
+    ShirtPB shirt = 13;//球衣
+    BadgePB badge = 14;//队徽
+    TifoBrandPB tifo = 15;//TIFO
+    sint32 guide = 16; // 新手引导
+    SoccerCourtPB court = 17; // 球场
+    PvpInfoPb pvp_info = 18;//pvp信息
+    sint32 highest_fight = 19;//历史最高战斗力
+}
+//PVP信息
+message PvpInfoPb{
+    sint32 status = 1;//pvp状态(1:没打pvp;2:pvp加载中;3:游戏中;4:结算)
+    string ip = 2;//pvp ip
+    sint32 port = 3;//pvp 端口
+    sint32 match_id = 4;//匹配标识
+    sint32 game_id = 5;//游戏ID
+    MatchSuccessRes match_success = 6; //匹配成功队伍信息
 }
 
 message PvpInfoReq{
@@ -40,3 +57,4 @@ message PvpInfoRes{
     string ip = 2;
     sint32 port =3;
 }
+

@@ -34,7 +34,7 @@ public class ClassInit implements InitializingBean {
     public  String filePath;
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet(){
         List<JdbcInfo> jdbcInfos = jdbcInfoDAO.getGameAllJdbcInfo();
         List<Config> allConfig = configDao.getAllConfig();
         JdbcManage.initJdbcInfo(jdbcInfos);

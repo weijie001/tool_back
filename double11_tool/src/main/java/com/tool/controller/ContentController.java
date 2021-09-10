@@ -3,6 +3,7 @@ package com.tool.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.tool.bean.*;
 import com.tool.dao.CommonDao;
+import com.tool.dao.ConfigDao;
 import com.tool.util.CommonUtil;
 import com.tool.util.FileUtil;
 import com.tool.util.JdbcUtil;
@@ -51,7 +52,8 @@ public class ContentController {
     private OneWebSocket oneWebSocket;
     @Autowired
     private CommonDao commonDao;
-
+    @Autowired
+    ConfigDao configDao;
     /**
      * 文件上传对比
      * @param file
@@ -68,7 +70,8 @@ public class ContentController {
         ResultInfo resultInfo = new ResultInfo();
         Workbook wb = getWb(file);
         //默认data数据源
-        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc();
+        String evnTag = configDao.getEvnTag();
+        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc(evnTag);
         List<String> errors = new ArrayList<>();
         int numberOfSheets = wb.getNumberOfSheets();
         List<TableData> myData = new ArrayList<>();
@@ -213,10 +216,13 @@ public class ContentController {
                     if (!errorIndex.contains(k)) {
                         TableCell tableCell = new TableCell();
                         Cell cell = r.getCell(k);
-                        cell.setCellType(Cell.CELL_TYPE_STRING);
+                        String value = "";
+                        if (cell != null) {
+                            cell.setCellType(Cell.CELL_TYPE_STRING);
+                            value = cell.getStringCellValue();
+                        }
                         String columnName = (String) columnNames2.get(index++);
                         String originValue = "";
-                        String value = cell.getStringCellValue();
                         if (value != null) {
                             value = value.trim();
                         }
@@ -395,7 +401,8 @@ public class ContentController {
 
             }
         }
-        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc();
+        String evnTag = configDao.getEvnTag();
+        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc(evnTag);
         List<String> errors = new ArrayList<>();
         for (String sql : sqlList) {
             if (!StringUtils.isEmpty(sql)) {
@@ -416,7 +423,8 @@ public class ContentController {
         Map dataMap = JSONObject.parseObject(row, Map.class);
         Object test = dataMap.get("test");
         boolean isDelete = String.valueOf(test).contains("2");
-        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc();
+        String evnTag = configDao.getEvnTag();
+        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc(evnTag);
         List<Map<String, Object>> columnsInfo = commonDao.tableColumnsInfo(jdbcTemplate, tableName);
         StringBuilder stringBuffer = new StringBuilder("replace into " + tableName + "(");
         StringBuilder deleteSql = new StringBuilder("delete from " + tableName + " where 1 = 1 ");
@@ -448,14 +456,16 @@ public class ContentController {
 
     @RequestMapping("getAllTables")
     public List<Map<String, Object>> getAllTables() {
-        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc();
+        String evnTag = configDao.getEvnTag();
+        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc(evnTag);
         return commonDao.getAllTables(jdbcTemplate);
     }
 
     @RequestMapping("deleteTableData")
     public void deleteTableData(String  row,String tableName) {
         Map dataMap = JSONObject.parseObject(row, Map.class);
-        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc();
+        String evnTag = configDao.getEvnTag();
+        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc(evnTag);
         List<Map<String, Object>> columnsInfo = commonDao.tableColumnsInfo(jdbcTemplate, tableName);
         StringBuilder stringBuffer = new StringBuilder("delete from  "+tableName+" where 1 = 1 ");
         StringBuilder values = new StringBuilder();
@@ -473,7 +483,8 @@ public class ContentController {
     public QueryData getTableData(@RequestParam String page,@RequestParam String pageRow,@RequestParam String tableName) {
         QueryData queryData = new QueryData();
         String dbSql = "select * from "+tableName;
-        JdbcTemplate defaultDataJdbc = JdbcUtil.getDefaultDataJdbc();
+        String evnTag = configDao.getEvnTag();
+        JdbcTemplate defaultDataJdbc = JdbcUtil.getDefaultDataJdbc(evnTag);
         PageList pageList = commonDao.queryPage(defaultDataJdbc, dbSql, Integer.parseInt(page), Integer.parseInt(pageRow));
         queryData.setPageList(pageList);
         List<Map<String, Object>> columns = commonDao.tableColumnsInfo(defaultDataJdbc, tableName);

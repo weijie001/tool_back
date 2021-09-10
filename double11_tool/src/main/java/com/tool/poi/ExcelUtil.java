@@ -2,7 +2,9 @@ package com.tool.poi;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.tool.constant.Constant;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.tomcat.util.bcel.Const;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -11,11 +13,12 @@ import java.io.File;
 import java.io.FileInputStream;
 
 public class ExcelUtil {
+
     private static final Logger log = LoggerFactory.getLogger(ExcelUtil.class);
-    private static final String CONFIG_FILE = "config";
+
     public static JSONObject getExcelData(String filePath) {
         try {
-            String path = filePath+CONFIG_FILE+File.separator;
+            String path = filePath+ Constant.CONFIG +File.separator;
             File file = new File(path);
             log.info("get select items");
             String fileName = null;
@@ -36,13 +39,10 @@ public class ExcelUtil {
             log.info("excel file name:{}",pathName);
             FileInputStream inp = new FileInputStream(pathName);
             Workbook workbook = WorkbookFactory.create(inp);
-            //获取sheet数
             int sheetNum = workbook.getNumberOfSheets();
             JSONObject jsonObject = new JSONObject();
             for (int s = 0; s < sheetNum; s++) {
-                // Get the Sheet of s.
                 Sheet sheet = workbook.getSheetAt(s);
-                //获取最大行数
                 int rownum = sheet.getPhysicalNumberOfRows();
                 if (rownum <= 1) {
                     continue;

@@ -7,11 +7,11 @@ import com.tool.manage.JdbcManage;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class JdbcUtil {
-    public static  JdbcTemplate getDefaultDataJdbc() {
-        return JdbcManage.getTemplateBy(ConfigManage.getConfig(Constant.DEFAULT_DATA_BASE).getConfigValue(), JdbcInfo.MARK_DATA);
+    public static  JdbcTemplate getDefaultDataJdbc(String envTag) {
+        return JdbcManage.getTemplateBy(envTag, JdbcInfo.MARK_DATA);
     }
 
-    public static  JdbcTemplate getDefaultGameJdbc() {
-        return JdbcManage.getTemplateBy(ConfigManage.getConfig(Constant.DEFAULT_GAME_BASE).getConfigValue(), JdbcInfo.MARK_GAME);
+    public static  JdbcTemplate getDefaultGameJdbc(String envTag) {
+        return JdbcManage.getTemplateBy(envTag, JdbcInfo.MARK_GAME);
     }
 }

@@ -1,6 +1,5 @@
 package com.tool.dao;
 
-import com.tool.bean.CommonBean;
 import com.tool.bean.PageList;
 import com.tool.mapper.CommonMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,20 +14,24 @@ public class CommonDao {
 
     @Autowired
     protected CommonMapper commonMapper;
+    @Autowired
+    protected ConfigDao configDao;
+
     public List<Map<String, Object>> tableColumnsInfo(JdbcTemplate template,String tableName) {
+        String dataBase = configDao.getDataBase();
         String sql = "SELECT " +
                 "* " +
                 "FROM " +
                 "information_schema. COLUMNS " +
                 "WHERE " +
-                "TABLE_SCHEMA = 'd11_data_dev'" +
-                "AND TABLE_NAME = '"+tableName+"' order by ORDINAL_POSITION ";
+                "TABLE_SCHEMA = '" + dataBase + "' AND TABLE_NAME = '" + tableName + "' order by ORDINAL_POSITION ";
 
         return template.queryForList(sql);
     }
 
     public List<Map<String, Object>> getAllTables(JdbcTemplate template) {
-        String sql = "select `table_name` from information_schema.`TABLES` WHERE TABLE_SCHEMA = 'd11_data_dev'";
+        String dataBase = configDao.getDataBase();
+        String sql = "select `table_name` from information_schema.`TABLES` WHERE TABLE_SCHEMA = '"+dataBase+"'";
         return template.queryForList(sql);
     }
 
@@ -44,11 +47,12 @@ public class CommonDao {
     }
 
     public List<Map<String, Object>> tables(JdbcTemplate template,String tableName) {
+        String dataBase = configDao.getDataBase();
         String sql = "SELECT " +
                 "table_name " +
                 "FROM " +
                 "INFORMATION_SCHEMA.TABLES wHERE " +
-                "TABLE_SCHEMA = 'd11_data_dev' and table_name like '%"+tableName+"%'";
+                "TABLE_SCHEMA = '"+dataBase+"' and table_name like '%"+tableName+"%'";
         return template.queryForList(sql);
     }
 

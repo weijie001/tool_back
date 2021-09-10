@@ -15,6 +15,8 @@ message LeagueInfoRes{
     repeated LeagueMatchInfoPB match_info = 3;//赛程
     repeated  LeagueRankPB    ranks = 4;//积分榜
     bool end = 5;//联赛是否结束
+    sint32 npc_rank = 6;                // npc排名
+    LevelInfoPB pve_history = 7;        // PVE联赛历史最高等级信息
 }
 
 message LeagueMatchInfoPB{
@@ -74,4 +76,9 @@ message LeagueBestRecordPB {
 message LeagueGainAwardRes {
     sint32    ret = 1;//ret
     repeated        ItemAwardPB    items = 2;//奖励资源
+}
+
+message LeagueSkillChallengeCostReq{
+    sint32 skill_challenge_id = 1;//技巧挑战ID
+    sint32 seq = 2;//关卡
 }

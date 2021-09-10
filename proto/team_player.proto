@@ -35,4 +35,5 @@ message CapInfoRes {
 message PlayersRes{
     sint32 ret = 1;
     repeated PlayersInfoPB data = 2;//球员信息
+    repeated PlayersCultivatePB cultivates = 3; // 球员培养属性
 }

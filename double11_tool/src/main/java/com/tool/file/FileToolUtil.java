@@ -1,17 +1,28 @@
 package com.tool.file;
 
+import com.tool.constant.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import java.io.*;
 
+/**
+ * 解析pb文件
+ */
 public class FileToolUtil {
+
     private static final Logger log = LoggerFactory.getLogger(FileToolUtil.class);
-    private static final String PROTO_FILE = "proto";
-    public static String getContent(String str,String filePath) throws IOException {
+
+    /**
+     * 根据pb名称转json格式字符串
+     * @param str
+     * @param filePath
+     * @return
+     */
+    public static String getContent(String str,String filePath){
         String req = str.split("\\.")[1];
-        String path = filePath+PROTO_FILE+File.separator;
+        String path = filePath + Constant.PROTO + File.separator;
         log.info("proto file path:{}",path);
         File file = new File(path);
         File[] files = file.listFiles();
@@ -56,66 +67,77 @@ public class FileToolUtil {
             reader = new BufferedReader(new InputStreamReader(input));
             String tempString;
             boolean isFind =false;
-            String str = "";
+            StringBuilder str = new StringBuilder();
             while ((tempString = reader.readLine()) != null) {
                 if (isFind) {
                     if(tempString.contains("}")){
-                        str = str.substring(0, str.length() - 1);
-                        str =str + "}";
+                        str = new StringBuilder(str.substring(0, str.length() - 1));
+                        str.append("}");
                         isFind = false;
                     }else{
                         String[] split = tempString.split("\\s+");
                         String s1 = split[1];
                         String s2 = split[2];
                         String s3 = split[3];
-                        if(s1.equals("sint32")||s1.equals("int32")){
-                            str =str+ "\"" + s2 + "\"" + ":" + "1,";
-                        }else if(s1.equals("string")){
-                            str =str+ "\"" + s2 + "\"" + ":" + "\"string\",";
-                        }else if(s1.equals("bool")){
-                            str =str+  "\"" + s2 + "\"" + ":" + "true,";
-                        }else if(s1.equals("repeated")){
-                            if(s2.equals("sint32")){
-                                str =str+  "\"" + s3 + "\"" + ":" + "[1,2],";
-                            }else{
-                                str = str + "\"" + s3 + "\"" + ":" + "";
-                                String r = getParam(file, s2);
-                                if (StringUtils.isEmpty(r)) {
-                                    r = "{},";
+                        switch (s1) {
+                            case "sint32":
+                            case "int32":
+                                str.append("\"").append(s2).append("\"").append(":").append("1,");
+                                break;
+                            case "string":
+                                str.append("\"").append(s2).append("\"").append(":").append("\"string\",");
+                                break;
+                            case "bool":
+                                str.append("\"").append(s2).append("\"").append(":").append("true,");
+                                break;
+                            case "repeated":
+                                if (s2.equals("sint32")) {
+                                    str.append("\"").append(s3).append("\"").append(":").append("[1,2],");
+                                } else {
+                                    str.append("\"").append(s3).append("\"").append(":");
+                                    String r = getParam(file, s2);
+                                    if (StringUtils.isEmpty(r)) {
+                                        r = "{},";
+                                    }
+                                    str.append(r).append(",");
                                 }
-                                str = str + r+",";
-                            }
+                                break;
                         }
                     }
 
                 }
-                if (tempString.contains(req) && tempString.contains("message")) {
+                if (tempString.toUpperCase().startsWith(("message "+req).toUpperCase()) && tempString.contains("message")) {
                     isFind = true;
-                    str =str + "{";
+                    str.append("{");
                 }
             }
-            return str;
+            return str.toString();
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
+            closeStream(input, reader);
         }
         return null;
     }
+
+    private static void closeStream(InputStream input, BufferedReader reader) {
+        if (input != null) {
+            try {
+                input.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (reader != null) {
+            try {
+                reader.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
     public static boolean  getFile(File file, String req) {
         InputStream input = null;
         BufferedReader reader = null;
@@ -134,21 +156,7 @@ public class FileToolUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
-            if (input != null) {
-                try {
-                    input.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
+            closeStream(input, reader);
         }
         return false;
     }

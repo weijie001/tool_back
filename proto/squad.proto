@@ -8,13 +8,14 @@ package com.proto;
 
 // 获取球队阵型信息列表
 message TeamSquadsReq {
-    bool isInGame = 1;                      // 是否在游戏中获取
+    sint32 gameProgress = 1;                // 游戏进度0-游戏外 1-准备 2-游戏中
 }
 message TeamSquadsRes {
     sint32 ret = 1;                         // 状态码
     repeated int32 squads = 2;              // 已经激活阵型ID列表
     int32 useCustomNo = 3;                  // 自定义编号, 目前正使用的哪套自定义阵型
     repeated CustomSquadPB pages = 4;       // 三套阵型信息列表
+    repeated int32 replaceNums = 5;         // 本局当前使用阵型被换下场过的球员Num列表
 }
 
 // 激活阵型
@@ -31,7 +32,8 @@ message ChangeSquadReq {
     int32 squadPage = 1;                    // 哪套阵型更换阵型
     int32 squadId = 2;                      // 更换为哪个阵型ID
     int32 tacticPage = 3;                   // 使用了哪套战术
-    bool isInGame = 4;                      // 是否在游戏中更换
+    sint32 gameProgress = 4;                // 游戏进度0-游戏外 1-准备 2-游戏中
+    repeated PlayersInfoPB starter = 5;     // 上报的首发球员站位列表
 }
 message ChangeSquadRes {
     sint32 ret = 1;                         // 状态码
@@ -41,11 +43,35 @@ message ChangeSquadRes {
 // 替补之间或首发之间或替补与首发球员间的位置互换
 message ChangePositionReq {
     int32 squadPage = 1;                    // 哪套阵型更替补席
-    int32 sourcePlayerNum = 2;              // 球员num1
-    int32 targetPlayerNum = 3;              // 球员num2
-    bool isInGame = 4;                      // 是否在游戏中更换
+    repeated ChangeTwoSidesPB twoSides = 2; // 更换位置列表，可多组人员调整
+    sint32 gameProgress = 3;                // 游戏进度0-游戏外 1-准备 2-游戏中
+    repeated PlayersInfoPB starter = 4;     // 上报的首发球员站位列表
+    sint32 gameTime = 5;                    // 客户端从本场开始到此刻已比赛的游戏时长(分钟)
 }
+
+// 更换位置双方
+message ChangeTwoSidesPB {
+    int32 sourcePlayerNum = 1;              // 球员num1
+    int32 targetPlayerNum = 2;              // 球员num2
+}
+
 message ChangePositionRes {
-     sint32 ret = 1;                        // 状态码
-     CustomSquadPB page = 2;                // 阵型属性页数据
+    sint32 ret = 1;                         // 状态码
+    CustomSquadPB page = 2;                 // 阵型属性页数据
+    repeated int32 replaceNums = 3;         // 本局当前使用阵型被换下场过的球员Num列表
+}
+
+// 设置球员职务
+message SetupPlayerDutyReq {
+    int32 squadPage = 1;                    // 哪套阵型设置球员职务
+    sint32 gameProgress = 2;                // 游戏进度0-游戏外 1-准备 2-游戏中
+    sint32 captain = 3;                     // 本套阵型设置队长
+    sint32 free_kick = 4;                   // 本套阵型谁踢任意球
+    sint32 penalty_kick = 5;                // 本套阵型谁踢点球
+    sint32 left_corner_kick = 6;            // 本套阵型谁踢左角球
+    sint32 right_corner_kick = 7;           // 本套阵型谁踢右角球
+}
+message SetupPlayerDutyRes {
+    sint32 ret = 1;                         // 状态码
+    CustomSquadPB page = 2;                 // 阵型属性页数据
 }

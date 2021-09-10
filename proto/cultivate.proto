@@ -9,47 +9,49 @@ package com.proto;
 
 // 查询球员升级时拥有的材料
 message QueryUpgradeMaterialReq {
-    int32 player_num = 1;            // 需要升级的球员编号
+    int32 player_num = 1;               // 需要升级的球员编号
+    int32 query_type = 2;               // 查询类型 0-查升级材料 1-查突破材料
 }
 message QueryUpgradeMaterialRes {
-    sint32 ret = 1;                 // 状态码
-    repeated int32 exp_cards = 2;    // 可选的经验卡列表
-    repeated int32 player_cards = 3; // 可选的球员卡列表
+    sint32 ret = 1;                     // 状态码
+    repeated TeamItemPB items = 2;      // 道具列表
+    repeated int32 player_cards = 3;    // 可选的球员卡列表
 }
 
 // 球员升级请求
 message BallPlayerUpgradeReq {
-    int32 player_num = 1;            // 需要升级的球员编号
-    repeated int32 exp_cards = 2;    // 消耗的经验卡列表
-    repeated int32 player_cards = 3; // 消耗的球员编号列表
+    int32 player_num = 1;               // 需要升级的球员编号
+    repeated TeamItemPB exp_cards = 2;  // 消耗的经验卡列表
+    repeated int32 player_cards = 3;    // 消耗的球员编号列表
 }
 message BallPlayerUpgradeRes {
-    sint32 ret = 1;                  // 状态码
-    sint32 level = 2;                // 球员当前等级
-    sint32 exp = 3;                  // 球员当前经验值
-    repeated int32 exp_cards = 4;    // 本次多的未消耗的经验卡列表
-    repeated int32 player_cards = 5; // 本次多的未消耗的球员编号列表
+    sint32 ret = 1;                     // 状态码
+    PlayersCultivatePB cultivate_info = 2;// 升级后球员培养属性
+    repeated TeamItemPB exp_cards = 3;  // 本次消耗的经验卡列表
+    repeated int32 player_cards = 4;    // 本次消耗的球员编号列表
 }
 
 // 球员突破请求
 message BallPlayerBreakthroughReq {
-    int32 player_num = 1;
-    int32 rarity_card = 2;
-    int32 rarity_and_pos = 3;
-    int32 same_card = 4;
-    repeated TeamItemPB cost_items = 5;
+    int32 player_num = 1;               // 突破的球员编号
+    repeated int32 rarity_card = 2;     // 使用的同稀有度卡
+    repeated int32 rarity_and_pos = 3;  // 使用的同稀有度同位置卡
+    repeated int32 same_card = 4;       // 使用的同名卡
+    repeated TeamItemPB cost_items = 5; // 使用的其它指定的材料
 }
 message BallPlayerBreakthroughRes {
-    sint32 ret = 1;                 // 状态码
+    sint32 ret = 1;                     // 状态码
+    PlayersCultivatePB cultivate_info = 2; // 突破后球员培养属性
 }
 
 // 球员加点请求
 message BallPlayerAddPointReq {
-    int32 player_num = 1;           // 球员编号
+    int32 player_num = 1;               // 球员编号
     repeated AttributePointPB add_points = 2; // 属性的加点
 }
 message BallPlayerAddPointRes {
-    sint32 ret = 1;                 // 状态码
+    sint32 ret = 1;                     // 状态码
+    PlayersCultivatePB cultivate_info = 2; // 加点后球员培养属性
 }
 
 

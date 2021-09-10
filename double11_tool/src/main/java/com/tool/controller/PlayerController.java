@@ -2,6 +2,7 @@ package com.tool.controller;
 
 import com.tool.bean.PageList;
 import com.tool.dao.CommonDao;
+import com.tool.dao.ConfigDao;
 import com.tool.dao.TeamDao;
 import com.tool.util.JdbcUtil;
 import com.tool.util.TableUtil;
@@ -26,11 +27,13 @@ public class PlayerController {
     private CommonDao commonDao;
     @Resource
     private TeamDao teamDao;
-
+    @Autowired
+    ConfigDao configDao;
     @RequestMapping("/getPlayers")
     public PageList getPlayers(@RequestParam String playerId, @RequestParam String rarity,
                                @RequestParam String page,@RequestParam String pageRow) {
-        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc();
+        String evnTag = configDao.getEvnTag();
+        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultDataJdbc(evnTag);
         String sql = "select * from t_player where 1=1 ";
         if (!StringUtils.isEmpty(playerId)) {
             sql += " and player_id = "+playerId;
@@ -43,8 +46,9 @@ public class PlayerController {
 
     @RequestMapping("/addPlayers")
     public boolean addPlayers(@RequestParam List<String> playerIds, String teamId) {
-        JdbcTemplate dataJdbcTemplate = JdbcUtil.getDefaultDataJdbc();
-        JdbcTemplate gameJdbcTemplate = JdbcUtil.getDefaultGameJdbc();
+        String evnTag = configDao.getEvnTag();
+        JdbcTemplate dataJdbcTemplate = JdbcUtil.getDefaultDataJdbc(evnTag);
+        JdbcTemplate gameJdbcTemplate = JdbcUtil.getDefaultGameJdbc(evnTag);
 
         Map<String, Object> teamInfo = teamDao.getTeamInfo(gameJdbcTemplate, teamId);
         if (teamInfo == null) {
@@ -57,7 +61,7 @@ public class PlayerController {
         Long num = (Long)teamNumMap.get("num");
         String tableName = TableUtil.getTableByTeamId("t_team_player_base", 10, teamId);
         String tableName2 = TableUtil.getTableByTeamId("t_team_player_cultivate", 10, teamId);
-        StringBuilder sqlPrefix1 = new StringBuilder("insert into " + tableName + "(`team_id`,`player_num`,`model`,`player_id`,`shirt_number`,`acess`,`create_time`,`over_rating`) values('"+teamId+"',");
+        StringBuilder sqlPrefix1 = new StringBuilder("insert into " + tableName + "(`team_id`,`player_num`,`model`,`player_id`,`shirt_number`,`acess`,`create_time`) values('"+teamId+"',");
         StringBuilder sqlPrefix2 = new StringBuilder("insert into " + tableName2 + "(`team_id`,`player_num`,`player_id`,`skill_level`) values('"+teamId+"',");
         Date now = new Date();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -71,7 +75,6 @@ public class PlayerController {
             sqlMid1.append("'").append(player.get("shirt_number")).append("',");
             sqlMid1.append("'").append("1").append("',");
             sqlMid1.append("'").append(nowStr).append("',");
-            sqlMid1.append("'").append(player.get("over_rating")).append("',");
             sqlMid2.append("'").append(num).append("',");
             sqlMid2.append("'").append(player.get("player_id")).append("',");
             Integer skillLevel = (Integer)player.get("skill_id");

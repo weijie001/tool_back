@@ -67,29 +67,34 @@ message StrListRes {
   repeated string res = 2;
 }
 
+// 整形 + 字符串
+message TupleStoIPB {
+  string str = 1;
+  sint32 num = 2;
+}
 // 整形 + 字符串 请求
 message TupleReq {
-  sint32 num = 1;
-  string str = 2;
+    TupleStoIPB data = 1;
 }
 // 整形 + 字符串 返回
 message TupleRes {
   sint32 ret = 1; // 响应码
-  sint32 num = 2;
-  string str = 3;
+  TupleStoIPB data = 2;
 }
 
-//道具信息
-message ItemProto{
-  int32 itemId = 1;//道具id
-  int32 itemNum = 2;//道具数量
-}
-
+// 物品奖励
 message ItemAwardPB{
   sint32 item_id = 1; //道具资源id
   sint32 num = 2; //数量
 }
 
+// 球员的奖励
+message PlayerAwardPB{
+    sint32 player_id = 1; //球员
+    sint32 player_num = 2;
+}
+
+// 背包物品信息
 message TeamItemPB{
   sint32 item_id = 1; //道具资源id
   sint32 num = 2; //数量
@@ -98,10 +103,50 @@ message TeamItemPB{
 
 //玩家球员信息
 message PlayersInfoPB{
-  sint32 player_id = 1; //球员配置id
-  sint32 player_num = 2; //玩家球员唯一id
-  sint32 position = 3; //0代表没上场，>0代表上场位置
+  sint32 player_id = 1;       //球员规则配置中id
+  sint32 player_num = 2;      //玩家球员唯一id,同一个球员卡可以获得多个,因此需要唯一识别
+  sint32 position = 3;        //0代表没上场，>0代表上场位置
+  sint32 consume_stamina = 4; //0没有消耗体力 <0 消耗的体力值,注意球员体力 = 基础属性+成长属性+consume_stamina
+  sint32 shirt_number = 5;    //球员球衣号码
 }
+
+// 球员培养累计增加的属性
+// 球员最终属性=规则表中基础属性+培养后增加的属性
+message PlayersCultivatePB {
+    sint32 player_num = 1;          // 玩家球员唯一id
+    sint32 heading = 2;             // 头球属性
+    int32 finishing = 3;            // 射门准确度属性
+    int32 curl = 4;                 // 弧度属性
+    int32 free_kick = 5;            // 任意球属性
+    int32 kicking_power = 6;        // 射门力量属性
+    int32 ball_winning = 7;         // 抢断属性
+    int32 offensive_awareness = 8;  // 攻击力属性
+    int32 defensive_awareness = 9;  // 防守力属性
+    int32 jump = 10;                // 跳跃属性
+    int32 stamina = 11;             // 体力属性
+    int32 physical_contact = 12;    // 身体接触属性
+    int32 speed = 13;               // 速度属性
+    int32 acceleration = 14;        // 加速度属性
+    int32 deceleration = 15;        // 减速度属性
+    int32 ball_control = 16;        // 控球属性
+    int32 dribbling = 17;           // 带球属性
+    int32 low_pass = 18;            // 地面传球属性
+    int32 lofted_pass = 19;         // 长传属性
+    int32 gk_reflexes = 20;         // 门将反应属性
+    int32 gk_catching = 21;         // 门将接球属性
+    int32 gk_clearing = 22;         // 门将解围属性
+    int32 gk_reach = 23;            // 门将覆盖区域属性
+    int32 weak_foot_accuracy = 24;  // 非惯用脚精度属性
+    int32 form = 25;                // 状态起伏属性
+    int32 injury_resistance = 26;   // 抗受伤属性
+    int32 level = 27;               // 球员等级
+    int32 star_level = 28;          // 球员突破的星级
+    int32 exp = 29;                 // 球员当前等级经验
+    int32 allocate_point = 30;      // 可分配的加点
+    int32 skill_level = 31;         // 技能等级0-球员没配置技能
+    int32 over_rating = 32;         // 增加的能力值
+}
+
 
 message BallPlayerProto{
   int32 caseId = 1;/** caseId */
@@ -173,7 +218,12 @@ message CustomSquadPB {
     repeated int32 bench = 4;               // 阵型中替补球员
     int32 squadId = 5;                      // 本套阵型使用的阵型ID
     CustomTacticPB tactic = 6;              // 本套阵型使用的战术
-
+    sint32 captain = 7;                     // 本套阵型设置队长
+    sint32 free_kick = 8;                   // 本套阵型谁踢任意球
+    sint32 penalty_kick = 9;                // 本套阵型谁踢点球
+    sint32 left_corner_kick = 10;           // 本套阵型谁踢左角球
+    sint32 right_corner_kick = 11;          // 本套阵型谁踢右角球
+    repeated ShirtNumberPB shirt_number = 13;// 本套阵型球衣号码
 }
 
 // 球员属性点数据
@@ -181,4 +231,76 @@ message AttributePointPB {
   int32 attribute_id = 1;                   // 属性ID
   string attribute_name = 2;                // 属性名
   int32 point_num = 3;                      // 加点数量
+}
+
+// PVP展示信息
+message PVPInfoPB {
+  sint32 win = 1;                 // 胜局数
+  sint32 draw = 2;                // 平
+  sint32 lose = 3;                // 负
+  sint32 player_count = 4;        // 拥有球员数量
+  sint32 goal_count = 5;          // 进球数
+  sint32 mvp_player_id = 6;       // 最佳上球员ID
+}
+
+// 球衣编号数据
+message ShirtNumberPB {
+  sint32 player_num = 1;
+  sint32 shirt_num = 2;
+}
+
+// 球衣
+message ShirtPB
+{
+  SoccerShirtPB home_shirt = 1;   // 主队选择球衣
+  SoccerShirtPB away_shirt = 2;   // 客队选择球衣
+}
+
+// 足球服
+message SoccerShirtPB {
+  sint32 id = 1;                  // 球衣ID
+  string plan = 2;                // 自定义方案
+}
+
+// 队徽
+message BadgePB
+{
+  string badge_name = 1;          // 队徽名称
+  sint32 badge_bg = 2;            // 队徽背景层图 id
+  sint32 badge_logo = 3;          // 队徽Logo id
+  sint32 badge_bg_color = 4;      // 队徽背景层图 颜色下标0-6
+  sint32 badge_logo_color = 5;    // 队徽logo 颜色下标0-6
+  sint32 badge_name_color = 6;    // 队徽名字颜色下标0-6
+}
+
+// Tifo举牌
+message TifoBrandPB
+{
+  sint32 tifo_image = 1;          // tifo 图案 id
+  sint32 tifo_texture = 2;        // tifo 纹理 id
+  sint32 brand_image = 3;         // 举牌 图案Id
+  sint32 brand_texture = 4;       // 举牌 纹理id
+}
+
+// 球场信息
+message SoccerCourtPB {
+  sint32 id = 1;                  // 球场Id
+  sint32 roof = 2;                // 屋顶选项
+  sint32 turf = 3;                // 草皮选项
+  sint32 outside = 4;             // 外围选项
+}
+
+// 能量信息PB
+message EnergyInfoPB {
+  sint32 max = 1;                 // 能量上限
+  sint32 cur = 2;                 // 当前能量[0, max]
+  sint64 refresh_time = 3;        // 能量刷新时间时间戳
+  sint32 recover_interval = 4;    // 能量恢复时间间隔s
+}
+
+// 关卡信息PB
+// 天梯, 联赛 都由两个字段确定唯一性
+message LevelInfoPB {
+  sint32 first_lv = 1;            // 主等级：天梯为大段位, 联赛为联赛Id
+  sint32 second_lv = 2;           // 次等级：天梯为小段位, 联赛为小关卡
 }

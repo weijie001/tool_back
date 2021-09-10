@@ -15,6 +15,8 @@ message ScoutSearchRes{
     sint32 ret = 1;   // 状态码
     sint32 player_id = 2;   //搜索的球员
     sint32 gold = 3;//消耗的金币
+    sint32 lucky_num = 4; //当前幸运值
+    sint32 player_num = 5;//球员num
 }
 
 //解雇
@@ -36,6 +38,12 @@ message BallPlayerScoutCategoryRes{
     repeated ScoutCategoryInfo info = 2;
 }
 message ScoutCategoryInfo{
-    int32 playerId = 1;/** 序号 */
+    sint32 playerId = 1;/** 序号 */
     repeated ScoutCategoryPB scout_category = 2;
+}
+
+
+message GainLuckyAwardRes{
+    sint32 ret = 1;   // 状态码
+    PlayerAwardPB player_award = 2;//奖励
 }

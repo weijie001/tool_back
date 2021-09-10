@@ -54,7 +54,7 @@ public class OkhttpUtils {
         return result;
     }
 
-    public static byte[] post2(String url,byte[] input) throws IOException {
+    public static byte[] request(String url,byte[] input) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(outputStream);
         if (input != null) {
