@@ -50,7 +50,7 @@ public class PlayerController {
         JdbcTemplate dataJdbcTemplate = JdbcUtil.getDefaultDataJdbc(evnTag);
         JdbcTemplate gameJdbcTemplate = JdbcUtil.getDefaultGameJdbc(evnTag);
 
-        Map<String, Object> teamInfo = teamDao.getTeamInfo(gameJdbcTemplate, teamId);
+        Map<String, Object> teamInfo = teamDao.getTeam(gameJdbcTemplate, teamId);
         if (teamInfo == null) {
             return false;
         }

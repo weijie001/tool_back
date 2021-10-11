@@ -1,11 +1,15 @@
 package com.tool.file;
 
 import com.tool.constant.Constant;
+import com.tool.init.ProtoManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import java.io.*;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * 解析pb文件
@@ -20,50 +24,71 @@ public class FileToolUtil {
      * @param filePath
      * @return
      */
-    public static String getContent(String str,String filePath){
-        String req = str.split("\\.")[1];
-        String path = filePath + Constant.PROTO + File.separator;
-        log.info("proto file path:{}",path);
+    public static String getContent(String str,String filePath) throws IOException {
+
+
+        String path = filePath+"config"+File.separator;
+        log.info("path:{}",path);
         File file = new File(path);
+
+        String fileName = null;
         File[] files = file.listFiles();
-        File findFile = null;
         if (files != null) {
             for (File f : files) {
-                boolean isFind = getFile(f, req);
-                if (isFind) {
-                    findFile = f;
+                if (f.getName().endsWith("jar")) {
+                    fileName =f.getName();
                     break;
                 }
             }
         }
+        if (StringUtils.isEmpty(fileName)) {
+            log.info("jar file not exist!");
+            return null;
+        }
+        String jarPath = filePath+Constant.CONFIG+File.separator+fileName;
+        String req = str.split("\\.")[1];
+        JarEntry findFile = null;
+        JarFile jarFile1 = new JarFile(jarPath);
+        for (Enumeration<JarEntry> e = jarFile1.entries(); e.hasMoreElements(); ) {
+            JarEntry entry = e.nextElement();
+            String name = entry.getName();
+            if (name.endsWith(".proto")) {
+                boolean isFind = getFile(entry, req,jarFile1);
+                if (isFind) {
+                    findFile = entry;
+                    break;
+                }
+            }
+        }
+
         String containValid = null;
         if (findFile !=null) {
             log.info("find proto file:{}",findFile.getName());
-            String param = getParam(findFile, req);
+            String param = getParam(findFile, req,jarFile1);
             if (param != null) {
-                containValid = isContainValid(param);
+                containValid = isContainValid(param,jarFile1);
             }
         }
         log.info("input param:{}",containValid);
         return containValid;
     }
 
-    private static String isContainValid(String param) {
+    private static String isContainValid(String param,JarFile jarFile1) {
         String result;
         if (param.contains(",}")) {
             param = param.replaceAll(",}", "}");
-            result = isContainValid(param);
+            result = isContainValid(param,jarFile1);
         } else {
             return param;
         }
         return result;
     }
 
-    public static String getParam(File file,String req) {
+    public static String getParam(JarEntry file,String req,JarFile jarFile) {
         InputStream input = null;
         BufferedReader reader = null;
         try {
-            input = new FileInputStream(file);
+            input = jarFile.getInputStream(file);
             reader = new BufferedReader(new InputStreamReader(input));
             String tempString;
             boolean isFind =false;
@@ -95,7 +120,7 @@ public class FileToolUtil {
                                     str.append("\"").append(s3).append("\"").append(":").append("[1,2],");
                                 } else {
                                     str.append("\"").append(s3).append("\"").append(":");
-                                    String r = getParam(file, s2);
+                                    String r = getParam(file, s2,jarFile);
                                     if (StringUtils.isEmpty(r)) {
                                         r = "{},";
                                     }
@@ -138,11 +163,11 @@ public class FileToolUtil {
         }
     }
 
-    public static boolean  getFile(File file, String req) {
+    public static boolean  getFile(JarEntry file, String req,JarFile jarFile) {
         InputStream input = null;
         BufferedReader reader = null;
         try {
-            input = new FileInputStream(file);
+            input = jarFile.getInputStream(file);
             reader = new BufferedReader(new InputStreamReader(input));
             String tempString;
             boolean isFind=false;

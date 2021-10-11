@@ -34,10 +34,13 @@ message ChangeSquadReq {
     int32 tacticPage = 3;                   // 使用了哪套战术
     sint32 gameProgress = 4;                // 游戏进度0-游戏外 1-准备 2-游戏中
     repeated PlayersInfoPB starter = 5;     // 上报的首发球员站位列表
+    map<sint32, sint32> change_maps = 6; // 换人
 }
 message ChangeSquadRes {
     sint32 ret = 1;                         // 状态码
     CustomSquadPB page = 2;                 // 阵型属性页数据
+    string team_id = 3;//球队ID
+    map<sint32, sint32> change_maps = 4; // 换人
 }
 
 // 替补之间或首发之间或替补与首发球员间的位置互换

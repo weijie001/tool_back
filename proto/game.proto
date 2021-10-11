@@ -62,7 +62,16 @@ message PvpEndGameRes{
     repeated PlayerEndState stamina = 6;// 上场球员体力消耗变动
     string opponents_team_name = 7;//对手球队名
 }
-
+message PvpSetReq{
+    sint32 mode = 1;//3按键,4按键
+    string set = 2;//设置
+}
+message PvpSetRes{
+    sint32  ret = 1;//ret
+    sint32 type = 2;//类型 1 2 3
+    string three_set = 3;//进攻设置
+    string four_set = 4;//防御设置
+}
 // 球员比赛结束后的状态
 // *体力字段：
 //    1）客户端上报时为球员所剩体力(为正)
@@ -92,9 +101,10 @@ message SkillChallengeAward{
 
 message PvpGameInfosRes{
     sint32 ret = 1;
-    string ip = 2;//匹配服
-    sint32 port =3;//端口
-    PvpGameInfoPB pvp_game_info = 4;
+    sint32 season_id = 2;//赛季ID
+    string ip = 3;//匹配服
+    sint32 port = 4;//端口
+    PvpGameInfoPB pvp_game_info = 5;
 }
 
 message PvpGameInfoPB{
@@ -107,16 +117,30 @@ message PvpGameInfoPB{
     sint32 draw = 7;//平
     sint32 lose = 8;//输
     repeated PvpGameAward team_pvp_game_awards = 9;//奖励段位
+    repeated PvpGameMatchPB team_game_matchs = 10;//最近比赛记录
+}
+message PvpGameMatchPB{
+    string opponent_team_id = 1;// 对手球队ID
+    string opponent_team_name = 2;// 对手球队名称
+    BadgePB opponent_badge = 3;                      // 对手队徽
+    sint32 goal =4;//进球数
+    sint32 fumble =5;//失球数
+
 }
 
 message PvpGameAward{
     sint32 grade = 1;//段位
-    sint32 status = 2;//领取状态
+    sint32 status = 2;//领取状态 1:不可领取;2:待领取;3:已领取
 }
 
 message PvpGainAwardReq{
     sint32 game_id = 1;//游戏ID
     sint32 grade = 2;//段位
+}
+
+message PvpGainAwardRes{
+    sint32 ret = 1;//响应码
+    repeated ItemAwardPB awards = 2;//道具
 }
 
 // PVP开房间匹配

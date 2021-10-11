@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -54,6 +55,16 @@ public class ContentController {
     private CommonDao commonDao;
     @Autowired
     ConfigDao configDao;
+
+    public static void main(String[] args) {
+        DecimalFormat df=new DecimalFormat("0.00");//设置保留位数
+        int a =88;
+        int b= 92;
+        int i = a * 100 / 3000;
+
+
+        System.out.println("format = " + i);
+    }
     /**
      * 文件上传对比
      * @param file
@@ -127,7 +138,7 @@ public class ContentController {
                 }
                 String str = firstRow.getCell(j).getStringCellValue();
                 excelColumns.add(str);
-                str = str.replace("[I18N]", "");
+                str = str.replace("[I18N]", "").toLowerCase();
                 if (columnNames.contains(str)) {
                     columnNames2.add(str);
                     sqlBefore.append("`").append(str).append("`,");
@@ -166,6 +177,10 @@ public class ContentController {
             for (int j = 3; j < rowNum; j++) {
                 TableColumn tableColumn = new TableColumn();
                 Row r = sheet.getRow(j);
+                Cell rowCell = r.getCell(0);
+                if (null == rowCell || rowCell.toString().equals("")){
+                    break;
+                }
                 boolean has= true;
                 List<Map<String, Object>> collect = maps;
                 int match = 0;

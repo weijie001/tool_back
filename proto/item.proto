@@ -9,6 +9,7 @@ package com.proto;
 message ItemReq{
     sint32      item_id = 1; //使用道具id
     sint32      item_num = 2; //使用道具的数量
+    sint32      appoint_id = 3;//指定Id,选择的物品需要指定
 }
 
 message ItemRes{

@@ -30,7 +30,7 @@ public class CommonUtil {
         List<String> specialTables = new ArrayList<String>(){{
             add("Item");
             add("Player");
-            add("LeagueNpcTeam");
+            add("Club");
         }};
         Matcher matcher = humpPattern.matcher(str);
         StringBuffer sb = new StringBuffer("t");

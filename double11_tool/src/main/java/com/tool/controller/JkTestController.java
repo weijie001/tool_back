@@ -105,7 +105,7 @@ public class JkTestController {
      * @throws IOException
      */
     @RequestMapping("/getInputParam")
-    public String getParam(@RequestParam String req) {
+    public String getParam(@RequestParam String req) throws IOException {
         log.info("get input param!");
         return FileToolUtil.getContent(req, filePath);
     }
@@ -157,7 +157,7 @@ public class JkTestController {
     public Map<String, Object> getTeamInfo(@RequestParam String teamId) throws Exception {
         String evnTag = configDao.getEvnTag();
         JdbcTemplate devGameJdbc = JdbcUtil.getDefaultGameJdbc(evnTag);
-        return teamDao.getTeamInfo(devGameJdbc, teamId);
+        return teamDao.getTeam(devGameJdbc, teamId);
     }
 
     @GetMapping("/loginValid2")
@@ -216,6 +216,80 @@ public class JkTestController {
         log.info("delete file name:{}", pathName);
         Process process = Runtime.getRuntime().exec(ShellUtil.getCommand("rm -rf " + pathName));
         return process.waitFor();
+    }
+
+    @GetMapping("/getDate")
+    public List<String> getDate() throws IOException, InterruptedException {
+        String cmd = "ssh root@192.168.1.10 \"date +'%Y-%m-%d %H:%M:%S' && jps |grep d11-server\"";
+        return executeCmd(cmd);
+    }
+
+    private List<String> executeCmd(String cmd) throws IOException, InterruptedException {
+        Process process = Runtime.getRuntime().exec(ShellUtil.getCommand(cmd));
+        String line;
+        List<String> strList = new ArrayList();
+        InputStream is = process.getInputStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        while((line = reader.readLine())!= null){
+            System.out.println(line);
+            strList.add(line);
+        }
+        process.waitFor();
+        is.close();
+        reader.close();
+        process.destroy();
+        return strList;
+    }
+
+    @GetMapping("/setDate")
+    public int setDate(@RequestParam String date) throws IOException, InterruptedException {
+        String cmd = "ssh root@192.168.1.10 \"date -s '"+date+"'\"";
+        log.info("cmd:{}",cmd);
+        Process process = Runtime.getRuntime().exec(ShellUtil.getCommand(cmd));
+        process.waitFor();
+        return process.waitFor();
+    }
+
+    @GetMapping("/startServer")
+    public int startServer() throws InterruptedException, IOException {
+        String cmd = "ssh root@192.168.1.10 \"cd /data/server/d11_gs1/server/ && sh start.sh\"";
+        log.info("cmd:{}",cmd);
+        Process process = Runtime.getRuntime().exec(ShellUtil.getCommand(cmd));
+        return process.waitFor();
+    }
+
+    @GetMapping("/stopServer")
+    public int stopServer() throws InterruptedException, IOException {
+        String cmd = "ssh root@192.168.1.10 \"cd /data/server/d11_gs1/server/ && sh stop.sh\"";
+        log.info("cmd:{}",cmd);
+        Process process = Runtime.getRuntime().exec(ShellUtil.getCommand(cmd));
+        return process.waitFor();
+    }
+
+    @GetMapping("/queryTeamInfo")
+    public Map<String, Object> queryTeamInfo(@RequestParam String teamName){
+        String evnTag = configDao.getEvnTag();
+        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultGameJdbc(evnTag);
+        Map<String, Object> teamInfo = teamDao.getTeamInfo(jdbcTemplate, teamName);
+        if (teamInfo == null) {
+            return null;
+        }
+        String teamId = (String) teamInfo.get("team_id");
+        Map<String, Object> energyInfo = teamDao.getTeamEnergy(jdbcTemplate, teamId);
+        if (energyInfo != null) {
+            teamInfo.putAll(energyInfo);
+        }
+        return teamInfo;
+    }
+
+    @GetMapping("/updateTeamInfo")
+    public int updateTeamInfo(@RequestParam String teamId,@RequestParam String teamName,@RequestParam Integer luckyNum,
+                              @RequestParam Integer max,@RequestParam Integer cur){
+        String evnTag = configDao.getEvnTag();
+        JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultGameJdbc(evnTag);
+        teamDao.updateTeamInfo(jdbcTemplate, teamId, teamName, luckyNum);
+        teamDao.updateTeamEnergy(jdbcTemplate, teamId, max, cur);
+        return 0;
     }
 
     /**

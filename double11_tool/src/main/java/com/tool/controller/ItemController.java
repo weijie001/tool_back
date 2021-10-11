@@ -53,7 +53,7 @@ public class ItemController {
     public boolean addItems(@RequestParam String teamId,@RequestParam List<Integer> itemIds,@RequestParam int num) {
         String evnTag = configDao.getEvnTag();
         JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultGameJdbc(evnTag);
-        Map<String, Object> teamInfo = teamDao.getTeamInfo(jdbcTemplate, teamId);
+        Map<String, Object> teamInfo = teamDao.getTeam(jdbcTemplate, teamId);
         if (teamInfo == null) {
             return false;
         }

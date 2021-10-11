@@ -24,7 +24,7 @@ message SatisfactionAwardPB{
 
 //任务列表
 message TeamMissionReq{
-    sint32 mission_type = 1;//任务类型   1 2 4
+    sint32 mission_type = 1;//任务类型   1 2 3
 }
 
 message TeamMissionRes{
@@ -36,6 +36,9 @@ message TeamMissionPB{
     sint32 mission_id = 1;
     sint32 progress = 2;//进度
     sint32 status = 3;//状态 1 未完成 2 未领取 3已领取
+    sint32 player_id = 4;//触发任务的球员ID
+    sint64 end_time = 5;//任务结束时间
+    sint64 mission_type = 6;//任务类型
 }
 //领取任务奖励
 message GainMissionAwardReq{

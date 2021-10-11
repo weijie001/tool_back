@@ -15,10 +15,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.List;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 @Component
 public class ClassInit implements InitializingBean {
@@ -34,7 +38,7 @@ public class ClassInit implements InitializingBean {
     public  String filePath;
 
     @Override
-    public void afterPropertiesSet(){
+    public void afterPropertiesSet() throws IOException {
         List<JdbcInfo> jdbcInfos = jdbcInfoDAO.getGameAllJdbcInfo();
         List<Config> allConfig = configDao.getAllConfig();
         JdbcManage.initJdbcInfo(jdbcInfos);
@@ -64,8 +68,18 @@ public class ClassInit implements InitializingBean {
 
     }
 
-    public  void loadJar(String jarPath) {
+    public  void loadJar(String jarPath) throws IOException {
         File jarFile = new File(jarPath);
+        JarFile jarFile1 = new JarFile(jarPath);
+
+        for (Enumeration<JarEntry> e = jarFile1.entries(); e.hasMoreElements(); ) {
+            JarEntry entry = e.nextElement();
+            String name = entry.getName();
+            if (name.endsWith(".proto")) {
+                InputStream inputStream = jarFile1.getInputStream(entry);
+                ProtoManager.byName.put(entry.getName(), inputStream);
+            }
+        }
         //文件存在
         if (jarFile.exists() == false) {
             log.info("jar file not found.");
