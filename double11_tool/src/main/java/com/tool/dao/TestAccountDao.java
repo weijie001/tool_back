@@ -27,13 +27,15 @@ public class TestAccountDao {
     }
 
 
-    public int add(String account,String env) {
-        String sql = "insert into t_test_account(account,env) values(?,?)";
+    public int add(String account,String env,String serverId,String name) {
+        String sql = "insert into t_test_account(account,env,server_id,name) values(?,?,?,?)";
         KeyHolder holder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, account);
             ps.setString(2, env);
+            ps.setString(3, serverId);
+            ps.setString(4, name);
             return ps;
         }, holder);
         return Objects.requireNonNull(holder.getKey()).intValue();

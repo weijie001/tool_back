@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "MsgProtos";
+
+import "base.proto";
+
+package com.proto;
+
+//心跳统一请求回包
+message HeartbeatMsgRes{
+    sint32 ret = 1;
+    repeated PvpInviteTeamPb pvp_invites = 2;//pvp邀请玩家id
+}
+
+message PvpInviteTeamPb{
+    string team_id = 1;//球队ID
+    string ip=2;//match ip
+    sint32 port = 3;//match 端口
+    BadgePB badge = 4;//队徽
+    string team_name = 5;//球队名称
+}
+
+// 大厅广播消息
+message PlazaMsgRes {
+    sint32 ret = 1;
+    repeated HorseRaceLampPB horse_race_lamps = 2;
+}
+
+//跑马灯PB
+message HorseRaceLampPB {
+    string id = 1;
+    repeated string key_contents = 2; //对应文案关键内容
+    sint64 end_time = 7;
+}

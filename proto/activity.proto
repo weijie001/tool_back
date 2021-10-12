@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+option java_package = "net.galasports.demo.protocol";
+option java_outer_classname = "ActivityProtos";
+
+import "base.proto";
+package com.proto;
+
+// ActivityType 活动类别说明：
+// LOGIN_TOTAL(1)   累计N天登陆活动
+// HONOR_ROAD(2)    荣耀之路
+
+
+// 活动列表返回
+message ActivityRes {
+  sint32 ret = 1;
+  repeated ActivityInfoPB infos = 2;
+}
+
+// 活动信息PB
+message ActivityInfoPB {
+    sint32 serial = 1;          // 活动编号
+    sint32 type = 2;            // 参考ActivityType活动类别说明：
+    string activity_info = 3;   // 活动说明
+    string page_url = 4;        // 超链接无时为空
+    sint32 order = 5;           // 排序越大越靠前
+    sint32 activity_id = 6;     // 对应该类活动id
+    sint64 begin_date = 7;      // 开始时间戳 0-随时开始 非0指定日期
+    sint64 end_date = 8;        // 结束时间戳 0-不结束 非0指定日期
+    sint64 show_time = 9;       // 活动开始展示时间戳 0-开启即展示
+    sint32 duration = 10;       // 活动从激活还剩余时间s 0-不限制时效
+    sint32 status = 11;         // 状态0-未生效，1-生效中 2-关闭
+}
+
+// 活动状态领取
+message ActivityAwardReq {
+    sint32 serial = 1;          // 活动编号
+    sint32 choice1 = 2;         // 领取时选择项1
+}
+message ActivityAwardRes {
+    sint32 ret = 1;
+    repeated ItemAwardPB awards = 2;// 奖励列表
+}
+
+// 累登N日请求
+message ActivityLoginTotalReq {
+    sint32 serial = 1;          // 活动编号
+}
+
+message ActivityLoginTotalRes {
+    sint32 ret = 1;
+    sint32 serial = 2;          // 活动编号
+    sint32 activity_id = 3;     // 活动id
+    string info = 4;            // 活动说明
+    sint32 days = 6;            // 当前累登第几天
+    repeated LoginTotalAwardPB awards = 7;// 累登奖励
+}
+
+// 累登奖励PB
+message LoginTotalAwardPB {
+    sint32 status = 1;          // 奖励状态 0-不能领取 1-可领未领取 2-已经领取
+    sint32 display_ads = 2;     // 广告页播放 0不播 >0播优先级
+    repeated ItemAwardPB items = 3;// 当天奖励列表
+}
+
+// 荣耀之路请求
+message ActivityHonorReq {
+    sint32 serial = 1;          // 活动编号
+}
+message ActivityHonorRes {
+    sint32 ret = 1;
+    sint32 serial = 2;          // 活动编号
+    sint32 activity_id = 3;     // 活动id
+    string info = 4;            // 活动说明
+    sint32 cur_honor = 5;       // 当前荣耀分
+    sint32 highest_honor = 6;   // 最高荣耀得分
+    sint32 honor_rate = 7;      // 最近下个奖励的比例需要/100
+    repeated HonorAwardPB awards = 8;    // 奖励列表
+}
+
+// 荣耀之路活动奖励PB
+message HonorAwardPB {
+    sint32 honor_point = 1;     // 需要的荣耀分
+    sint32 type = 2;//是否突出
+    sint32 status = 3;          // 奖励状态 0-不能领取 1-可领未领取 2-已经领取
+    string open_sys = 4;        // 开放系统(统-定义) 为空-没有新开放
+    string open_function = 5;   // 开放特殊功能 为空-没有新开放
+    sint32 use_fun_times = 6;   // 开放的特殊功能使用次数 0- 无使用次数
+    repeated ItemAwardPB items = 7;// 奖励列表
+}

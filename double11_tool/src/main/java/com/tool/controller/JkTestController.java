@@ -19,6 +19,9 @@ import com.tool.util.JdbcUtil;
 import com.tool.util.ShellUtil;
 import net.galasports.account.bean.ErrorCode;
 import net.galasports.account.bean.protocol.UserProtos;
+import net.galasports.support.pub.bean.proto.BaseProtos;
+import net.galasports.support.pub.bean.proto.GameInfoProtos;
+import net.tool.protocol.ChooseServerProtos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,11 +146,11 @@ public class JkTestController {
 
     @GetMapping("/getData")
     public String getData(@RequestParam String req, @RequestParam String res, @RequestParam String uri, @RequestParam(defaultValue = "{}") String data,
-                          @RequestParam String account, @RequestParam String env) throws Exception {
+                          @RequestParam String account, @RequestParam String env, @RequestParam String serverId) throws Exception {
         log.info("login!");
         String url = getUrl(env);
         UserProtos.UserRes userRes = loginPlatform(account);
-        login(userRes.getAccountId(), userRes.getToken(), url);
+        login(userRes.getAccountId(), userRes.getToken(), url,serverId);
         log.info("get data!");
         return send(uri, req, res, data, url);
     }
@@ -159,9 +162,8 @@ public class JkTestController {
         JdbcTemplate devGameJdbc = JdbcUtil.getDefaultGameJdbc(evnTag);
         return teamDao.getTeam(devGameJdbc, teamId);
     }
-
     @GetMapping("/loginValid2")
-    public String loginValid2(@RequestParam String account, @RequestParam String env) throws Exception {
+    public String loginValid2(@RequestParam String account, @RequestParam String env, @RequestParam String serverId) throws Exception {
         log.info("login!");
         UserProtos.LoginReq.Builder loginReq = UserProtos.LoginReq.newBuilder();
         loginReq.setAccount(account);
@@ -201,13 +203,7 @@ public class JkTestController {
             log.info("2:{}", res);
         }
         String url = "http://" + env + "/";
-        return login(res.getAccountId(), res.getToken(), url);
-    }
-
-    @GetMapping("/loginValid")
-    public String loginValid(@RequestParam String account, @RequestParam String token, @RequestParam String env) throws Exception {
-        log.info("login!");
-        return login(account, token, env);
+        return login(res.getAccountId(), res.getToken(), url,serverId);
     }
 
     @GetMapping("/deleteFile")
@@ -292,17 +288,6 @@ public class JkTestController {
         return 0;
     }
 
-    /**
-     * 发送请求
-     *
-     * @param url
-     * @param req
-     * @param res
-     * @param jsonStr
-     * @param env
-     * @return
-     * @throws Exception
-     */
     public static String send(String url, String req, String res, String jsonStr, String env) throws Exception {
         RequestComponent requestComponent;
         if (!StringUtils.isEmpty(req)) {
@@ -322,14 +307,14 @@ public class JkTestController {
         return requestComponent.exec(url, resClass);
     }
 
-    public static String login(String account, String token, String env) throws Exception {
+    public static String login(String account, String token, String env,String serverId) throws Exception {
         String strPrefix = "net.galasports.demo.protocol.";
         Class<?> loginReqClass = Class.forName(strPrefix + "LoginProtos$LoginReq");
         Class<?> loginReqBuildClass = Class.forName(strPrefix + "LoginProtos$LoginReq$Builder");
         Class<?> loginResClass = Class.forName(strPrefix + "LoginProtos$LoginRes");
         Method method = RequestComponent.getMethod(loginReqClass, "newBuilder", null);
         Message.Builder messageOrBuilder = (Message.Builder) method.invoke(loginReqBuildClass);
-        String jsonFormat = "{channel:\"SLI\",account_id:\"" + account + "\",token:\"" + token + "\",server_id:\"double11_003\"}";
+        String jsonFormat = "{channel:\"SLI\",account_id:\"" + account + "\",token:\"" + token + "\",server_id:\""+serverId+"\"}";
         JsonFormat.merge(jsonFormat, messageOrBuilder);
         RequestComponent requestComponent = new RequestComponent(messageOrBuilder.build(), env);
         return requestComponent.exec("loginC/login", loginResClass);
