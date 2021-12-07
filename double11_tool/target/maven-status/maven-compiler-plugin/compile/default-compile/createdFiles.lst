@@ -32,6 +32,8 @@ com\tool\Application.class
 com\tool\controller\AccountController.class
 com\tool\util\CommonUtil.class
 com\tool\util\TableUtil.class
+com\tool\bean\AccountInfo.class
+com\tool\controller\BaseController.class
 com\tool\mapper\ItemMapper.class
 com\tool\bean\ResultInfo.class
 com\tool\util\IOUtils.class
@@ -40,9 +42,11 @@ com\tool\controller\ContentController.class
 com\tool\file\FileToolUtil.class
 com\tool\config\WebSocketConfig.class
 com\tool\bean\Item.class
+com\tool\config\ToolConfig.class
 com\tool\mapper\JdbcInfoMapper.class
 com\tool\bean\TableData.class
 com\tool\websocket\OneWebSocket.class
+com\tool\bean\ChooseServerInfo.class
 com\tool\util\JdbcUtil.class
 com\tool\controller\MainController.class
 com\tool\bean\FileNameInfo.class
@@ -60,4 +64,5 @@ com\tool\service\ITestService.class
 com\tool\config\UsingStaticController.class
 com\tool\util\CommonUtil$1.class
 com\tool\util\FileUtil.class
+com\tool\controller\TestController.class
 com\tool\dao\ItemDao.class

@@ -43,7 +43,7 @@ public class ConfigController extends BaseController{
     public AccountInfo getAccount() throws IOException {
         List<TestAccount> allTestAccount = testAccountDao.getAllTestAccount();
         GameInfoProtos.GameServerReq build = GameInfoProtos.GameServerReq.newBuilder().setGame(toolConfig.getGameType()).setChannel(toolConfig.getChannel()).setChannelInfo(toolConfig.getChannelInfo()).build();
-        byte[] bytes = OkhttpUtils.request(toolConfig.getChooseServer(), build.toByteArray());
+        byte[] bytes = OkhttpUtils.request(toolConfig.getChooseServerUrl(), build.toByteArray());
         GameInfoProtos.GameServerRes gameServerRes = GameInfoProtos.GameServerRes.parseFrom(bytes);
         List<BaseProtos.GameServerInfoPB> gameServerInfoList = gameServerRes.getGameServerInfoList();
         AccountInfo accountInfo = new AccountInfo();

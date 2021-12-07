@@ -114,5 +114,6 @@
     <orderEntry type="library" name="Maven: net.galasports.support:public-bean:1.1.4" level="project" />
     <orderEntry type="library" name="Maven: net.galasports.lib:gala-base:1.0.11" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.9.0" level="project" />
+    <orderEntry type="library" name="Maven: org.projectlombok:lombok:1.18.16" level="project" />
   </component>
 </module>

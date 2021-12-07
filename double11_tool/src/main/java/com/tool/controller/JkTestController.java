@@ -2,7 +2,6 @@ package com.tool.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.googlecode.protobuf.format.JsonFormat;
 import com.tool.bean.FileNameInfo;
@@ -18,10 +17,8 @@ import com.tool.util.FileUtil;
 import com.tool.util.JdbcUtil;
 import com.tool.util.ShellUtil;
 import net.galasports.account.bean.ErrorCode;
+import net.galasports.account.bean.protocol.BaseProtos;
 import net.galasports.account.bean.protocol.UserProtos;
-import net.galasports.support.pub.bean.proto.BaseProtos;
-import net.galasports.support.pub.bean.proto.GameInfoProtos;
-import net.tool.protocol.ChooseServerProtos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +26,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -41,12 +41,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 接口配置
- */
+
 @RestController
 @RequestMapping("/jk")
-public class JkTestController {
+public class JkTestController extends BaseController {
     private static final Logger log = LoggerFactory.getLogger(JkTestController.class);
 
     @Value("${file.path}")
@@ -61,6 +59,7 @@ public class JkTestController {
 
     @Autowired
     ConfigDao configDao;
+
     /**
      * 获取配置文件
      *
@@ -128,9 +127,7 @@ public class JkTestController {
         return (JSONArray) excelData.get(Constant.SHEET_NAME);
     }
 
-    private String getUrl(String env) {
-        return "http://" + env + "/";
-    }
+
 
     private UserProtos.UserRes loginPlatform(String account) throws IOException {
         UserProtos.LoginReq.Builder loginReq = UserProtos.LoginReq.newBuilder();
@@ -144,13 +141,15 @@ public class JkTestController {
         return UserProtos.UserRes.parseFrom(bytes);
     }
 
+
+
     @GetMapping("/getData")
     public String getData(@RequestParam String req, @RequestParam String res, @RequestParam String uri, @RequestParam(defaultValue = "{}") String data,
                           @RequestParam String account, @RequestParam String env, @RequestParam String serverId) throws Exception {
         log.info("login!");
         String url = getUrl(env);
         UserProtos.UserRes userRes = loginPlatform(account);
-        login(userRes.getAccountId(), userRes.getToken(), url,serverId);
+        login(userRes.getAccountId(), userRes.getToken(), url, serverId);
         log.info("get data!");
         return send(uri, req, res, data, url);
     }
@@ -162,32 +161,33 @@ public class JkTestController {
         JdbcTemplate devGameJdbc = JdbcUtil.getDefaultGameJdbc(evnTag);
         return teamDao.getTeam(devGameJdbc, teamId);
     }
+
     @GetMapping("/loginValid2")
     public String loginValid2(@RequestParam String account, @RequestParam String env, @RequestParam String serverId) throws Exception {
         log.info("login!");
         UserProtos.LoginReq.Builder loginReq = UserProtos.LoginReq.newBuilder();
         loginReq.setAccount(account);
-        loginReq.setPwd(DigestUtils.md5DigestAsHex("123456".getBytes(StandardCharsets.UTF_8)));
+        loginReq.setPwd(DigestUtils.md5DigestAsHex(toolConfig.getDefaultPassword().getBytes(StandardCharsets.UTF_8)));
         loginReq.setMac("");
         loginReq.setIdfa("");
-        loginReq.setGameTypeId(5);
+        loginReq.setGameTypeId(toolConfig.getGameType());
         loginReq.setSystem("HarmonyOS");
-        byte[] bytes = OkhttpUtils.request("http://192.168.1.114:8087/userC/login/", loginReq.build().toByteArray());
+        byte[] bytes = OkhttpUtils.request(toolConfig.getLoginValidUrl(), loginReq.build().toByteArray());
         UserProtos.UserRes res = UserProtos.UserRes.parseFrom(bytes);
         log.info("1:{}", res);
         if (ErrorCode.SUCCESS.code() != res.getRet()) {
             UserProtos.RegisterReq.Builder registerReq = UserProtos.RegisterReq.newBuilder();
             registerReq.setAccount(account);
-            registerReq.setPwd(DigestUtils.md5DigestAsHex("123456".getBytes(StandardCharsets.UTF_8)));
+            registerReq.setPwd(DigestUtils.md5DigestAsHex(toolConfig.getDefaultPassword().getBytes(StandardCharsets.UTF_8)));
             registerReq.setAndroididUuid(DigestUtils.md5DigestAsHex(account.getBytes(StandardCharsets.UTF_8)));
-            registerReq.setChannel("SLI");
-            registerReq.setChannelInfo("LI_ANDROID");
+            registerReq.setChannel(toolConfig.getChannel());
+            registerReq.setChannelInfo(toolConfig.getChannelInfo());
             registerReq.setClientSystemVersion("");
             registerReq.setClientVersion("1000000");
             registerReq.setCode("");
             registerReq.setDeviceInfoJson("");
             registerReq.setFullChannel("LI_ANDROID@@@LI");
-            registerReq.setGameType(5);
+            registerReq.setGameType(toolConfig.getGameType());
             registerReq.setIdCard("");
             registerReq.setIdfa("");
             registerReq.setImeiIdfa(DigestUtils.md5DigestAsHex(account.getBytes(StandardCharsets.UTF_8)));
@@ -198,14 +198,17 @@ public class JkTestController {
             registerReq.setPhoneNumber("");
             registerReq.setPhoneSn("");
             registerReq.setSystem("HarmonyOS");
-            byte[] registerByte = OkhttpUtils.request("http://192.168.1.114:8087/userC/register/", registerReq.build().toByteArray());
+            byte[] registerByte = OkhttpUtils.request(toolConfig.getRegisterUrl(), registerReq.build().toByteArray());
             res = UserProtos.UserRes.parseFrom(registerByte);
             log.info("2:{}", res);
         }
-        String url = "http://" + env + "/";
-        return login(res.getAccountId(), res.getToken(), url,serverId);
+        String url = getUrl(env);
+        return login(res.getAccountId(), res.getToken(), url, serverId);
     }
 
+    private String getUrl(String env) {
+        return toolConfig.getHttpPrefix() + env + toolConfig.getHttpSuffix();
+    }
     @GetMapping("/deleteFile")
     public int deleteFile(@RequestParam String fileName, @RequestParam String dir) throws IOException, InterruptedException {
         String pathName = filePath + dir + File.separator + fileName;
@@ -216,17 +219,17 @@ public class JkTestController {
 
     @GetMapping("/getDate")
     public List<String> getDate() throws IOException, InterruptedException {
-        String cmd = "ssh root@192.168.1.10 \"date +'%Y-%m-%d %H:%M:%S' && jps |grep d11-server\"";
+        String cmd = toolConfig.getUpdateDatePrefix() + " \"date +'%Y-%m-%d %H:%M:%S' && jps |grep d11-server\"";
         return executeCmd(cmd);
     }
 
     private List<String> executeCmd(String cmd) throws IOException, InterruptedException {
         Process process = Runtime.getRuntime().exec(ShellUtil.getCommand(cmd));
         String line;
-        List<String> strList = new ArrayList();
+        List<String> strList = new ArrayList<>();
         InputStream is = process.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        while((line = reader.readLine())!= null){
+        while ((line = reader.readLine()) != null) {
             System.out.println(line);
             strList.add(line);
         }
@@ -239,8 +242,8 @@ public class JkTestController {
 
     @GetMapping("/setDate")
     public int setDate(@RequestParam String date) throws IOException, InterruptedException {
-        String cmd = "ssh root@192.168.1.10 \"date -s '"+date+"'\"";
-        log.info("cmd:{}",cmd);
+        String cmd = toolConfig.getUpdateDatePrefix() + " \"date -s '" + date + "'\"";
+        log.info("cmd:{}", cmd);
         Process process = Runtime.getRuntime().exec(ShellUtil.getCommand(cmd));
         process.waitFor();
         return process.waitFor();
@@ -248,22 +251,22 @@ public class JkTestController {
 
     @GetMapping("/startServer")
     public int startServer() throws InterruptedException, IOException {
-        String cmd = "ssh root@192.168.1.10 \"cd /data/server/d11_gs1/server/ && sh start.sh\"";
-        log.info("cmd:{}",cmd);
+        String cmd = toolConfig.getUpdateDatePrefix() + " \"cd " + toolConfig.getGsPath() + " && sh start.sh\"";
+        log.info("cmd:{}", cmd);
         Process process = Runtime.getRuntime().exec(ShellUtil.getCommand(cmd));
         return process.waitFor();
     }
 
     @GetMapping("/stopServer")
     public int stopServer() throws InterruptedException, IOException {
-        String cmd = "ssh root@192.168.1.10 \"cd /data/server/d11_gs1/server/ && sh stop.sh\"";
-        log.info("cmd:{}",cmd);
+        String cmd = toolConfig.getUpdateDatePrefix() + " \"cd " + toolConfig.getGsPath() + " && sh stop.sh\"";
+        log.info("cmd:{}", cmd);
         Process process = Runtime.getRuntime().exec(ShellUtil.getCommand(cmd));
         return process.waitFor();
     }
 
     @GetMapping("/queryTeamInfo")
-    public Map<String, Object> queryTeamInfo(@RequestParam String teamName){
+    public Map<String, Object> queryTeamInfo(@RequestParam String teamName) {
         String evnTag = configDao.getEvnTag();
         JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultGameJdbc(evnTag);
         Map<String, Object> teamInfo = teamDao.getTeamInfo(jdbcTemplate, teamName);
@@ -279,8 +282,8 @@ public class JkTestController {
     }
 
     @GetMapping("/updateTeamInfo")
-    public int updateTeamInfo(@RequestParam String teamId,@RequestParam String teamName,@RequestParam Integer luckyNum,
-                              @RequestParam Integer max,@RequestParam Integer cur){
+    public int updateTeamInfo(@RequestParam String teamId, @RequestParam String teamName, @RequestParam Integer luckyNum,
+                              @RequestParam Integer max, @RequestParam Integer cur) {
         String evnTag = configDao.getEvnTag();
         JdbcTemplate jdbcTemplate = JdbcUtil.getDefaultGameJdbc(evnTag);
         teamDao.updateTeamInfo(jdbcTemplate, teamId, teamName, luckyNum);
@@ -307,14 +310,14 @@ public class JkTestController {
         return requestComponent.exec(url, resClass);
     }
 
-    public static String login(String account, String token, String env,String serverId) throws Exception {
+    public static String login(String account, String token, String env, String serverId) throws Exception {
         String strPrefix = "net.galasports.demo.protocol.";
         Class<?> loginReqClass = Class.forName(strPrefix + "LoginProtos$LoginReq");
         Class<?> loginReqBuildClass = Class.forName(strPrefix + "LoginProtos$LoginReq$Builder");
         Class<?> loginResClass = Class.forName(strPrefix + "LoginProtos$LoginRes");
         Method method = RequestComponent.getMethod(loginReqClass, "newBuilder", null);
         Message.Builder messageOrBuilder = (Message.Builder) method.invoke(loginReqBuildClass);
-        String jsonFormat = "{channel:\"SLI\",account_id:\"" + account + "\",token:\"" + token + "\",server_id:\""+serverId+"\"}";
+        String jsonFormat = "{channel:\"SLI\",account_id:\"" + account + "\",token:\"" + token + "\",server_id:\"" + serverId + "\"}";
         JsonFormat.merge(jsonFormat, messageOrBuilder);
         RequestComponent requestComponent = new RequestComponent(messageOrBuilder.build(), env);
         return requestComponent.exec("loginC/login", loginResClass);
@@ -381,6 +384,20 @@ public class JkTestController {
         String configFile = path + dir + File.separator + fileName;
         File file = new File(configFile);
         FileUtil.downloadFile(res, file, file.getName());
+    }
+
+    @RequestMapping("refreshConfig")
+    public void refreshConfig(@RequestParam Integer module,@RequestParam String env, HttpServletResponse res) throws Exception {
+        System.out.println();
+        String url = getUrl(env)+"globalConfig/refresh/";
+        String strPrefix = "net.galasports.demo.protocol.";
+        Class<?> loginReqClass = Class.forName(strPrefix + "BaseProtos$IntReq");
+        Class<?> loginReqBuildClass = Class.forName(strPrefix + "BaseProtos$IntReq$Builder");
+        Method method = RequestComponent.getMethod(loginReqClass, "newBuilder", null);
+        Message.Builder messageOrBuilder = (Message.Builder) method.invoke(loginReqBuildClass);
+        String jsonFormat = "{req:" + module + "}";
+        JsonFormat.merge(jsonFormat, messageOrBuilder);
+        byte[] bytes = OkhttpUtils.request(url, messageOrBuilder.build().toByteArray());
     }
 
 }

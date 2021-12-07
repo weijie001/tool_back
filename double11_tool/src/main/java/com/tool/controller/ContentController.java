@@ -177,6 +177,9 @@ public class ContentController {
             for (int j = 3; j < rowNum; j++) {
                 TableColumn tableColumn = new TableColumn();
                 Row r = sheet.getRow(j);
+                if (r == null) {
+                    break;
+                }
                 Cell rowCell = r.getCell(0);
                 if (null == rowCell || rowCell.toString().equals("")){
                     break;

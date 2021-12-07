@@ -70,8 +70,8 @@ public class PlayerController {
             StringBuilder sqlMid1 = new StringBuilder();
             StringBuilder sqlMid2 = new StringBuilder();
             sqlMid1.append("'").append(num).append("',");
-            sqlMid1.append("'").append(player.get("player_id")).append("',");
             sqlMid1.append("'").append(player.get("model")).append("',");
+            sqlMid1.append("'").append(player.get("player_id")).append("',");
             sqlMid1.append("'").append(player.get("shirt_number")).append("',");
             sqlMid1.append("'").append("1").append("',");
             sqlMid1.append("'").append(nowStr).append("',");
