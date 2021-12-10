@@ -15,6 +15,7 @@ public class BaseController {
     @ExceptionHandler
     public ResponseResult<String> exp(HttpServletRequest request, Exception exp) {
         String message = exp.getMessage();
+        exp.printStackTrace();
         return new ResponseResult<>(1, message);
     }
 }

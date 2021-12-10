@@ -2,6 +2,7 @@ package com.tool.compare.loader;
 
 
 import com.tool.compare.context.CompareData;
+import com.tool.compare.context.CompareJdbcTemplate;
 import com.tool.compare.model.Column;
 import com.tool.compare.model.Database;
 import com.tool.compare.model.Index;
@@ -35,11 +36,11 @@ public class MysqlStructureLoader implements StructureLoader {
         stringBuilder.append("select * from ").append(leftDataBase).append(".").append(tableName).append(" t1 where not EXISTS( select 1 from ").
                 append(rightDataBase).append(".").append(tableName).append(" t2 where 1 = 1");
         for (String str : columns) {
-            stringBuilder.append(" and t1.")
+            stringBuilder.append(" and ifnull(t1.")
                     .append(str)
-                    .append("= t2.")
+                    .append(",'')= ifnull(t2.")
                     .append(str)
-                    .append(" ");
+                    .append(",'') ");
         }
         stringBuilder.append(");");
         return stringBuilder.toString();
@@ -55,27 +56,42 @@ public class MysqlStructureLoader implements StructureLoader {
         return value;
     }
 
-    public List<CompareData> compareData(JdbcTemplate jdbcTemplate, String databaseName,String userId) {
+    public List<CompareData> compareData(JdbcTemplate jdbcTemplate, String databaseName,String userId,boolean sync) {
         List<Table> tables = getAllTables(jdbcTemplate, databaseName);
         List<CompareData> compareDatas = new ArrayList<>();
         long l = System.currentTimeMillis();
         System.out.println("开始对比数据");
         int index = 1;
         int size = tables.size();
+        if (sync) {
+            WebSocketManager.sendMessage2(userId, "==========>>          ");
+        }
         for (Table table : tables) {
-            loadColumns(jdbcTemplate, databaseName, table.getName(),compareDatas);
             int percent = index*100/size;
-            WebSocketManager.sendMessage2(userId, percent +"$"+table.getName());
+            if (sync) {
+                WebSocketManager.sendMessage2(userId, "compare table"+table.getName()+"$"+index);
+            }else{
+                WebSocketManager.sendMessage2(userId, percent +"$"+table.getName());
+            }
+            try {
+                loadColumns(jdbcTemplate, databaseName, table.getName(), compareDatas);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             index++;
         }
-        WebSocketManager.sendMessage2(userId,"100$ok");
+        if (!sync){
+            WebSocketManager.sendMessage2(userId,"100$ok");
+        }else{
+            WebSocketManager.sendMessage2(userId," ");
+        }
         System.out.println("数据对比时间"+(System.currentTimeMillis()-l));
         return compareDatas;
     }
     public void loadColumns(JdbcTemplate jdbcTemplate, String databaseName,String tableName,List<CompareData> compareDatas) {
         String colSql = "SELECT COLUMN_NAME AS `name` from information_schema.`COLUMNS` where TABLE_SCHEMA  =  '" + databaseName + "' and table_name ='"+tableName+"'";
         List<String> columns = jdbcTemplate.query(colSql, (resultSet, i) -> resultSet.getString("name"));
-        String compareSql2 = getCompareSql(columns, "d11_data_test", "d11_data_dev",tableName);
+        String compareSql2 = getCompareSql(columns, CompareJdbcTemplate.getRightDataBaseName(), CompareJdbcTemplate.getLeftDataBaseName(),tableName);
         List<Map<String, Object>> removeLists = jdbcTemplate.queryForList(compareSql2);
         List<String> deleteSqls = new ArrayList<>();
         for (Map<String, Object> map : removeLists) {
@@ -96,24 +112,29 @@ public class MysqlStructureLoader implements StructureLoader {
             String replace = stringBuilder1.toString().replace("1 = 1 and", "");
             deleteSqls.add(replace);
         }
-        String compareSql = getCompareSql(columns, "d11_data_dev", "d11_data_test",tableName);
+        String compareSql = getCompareSql(columns, CompareJdbcTemplate.getLeftDataBaseName(), CompareJdbcTemplate.getRightDataBaseName(),tableName);
         List<Map<String, Object>> maps = jdbcTemplate.queryForList(compareSql);
         List<String> insertSqls = new ArrayList<>();
         for (Map<String, Object> map : maps) {
             StringBuilder stringBuilder1 = new StringBuilder();
-            stringBuilder1.append("insert into `"+tableName+"`(");
+            stringBuilder1.append("insert into `").append(tableName).append("`(");
             StringBuilder stringBuilder2 = new StringBuilder();
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 String key = entry.getKey();
                 stringBuilder1.append("`").append(key).append("`").append(",");
                 Object value = entry.getValue();
+
                 if(value instanceof Timestamp) {
                     value = getTimestampValue(String.valueOf(value));
                 }
                 if (value == null) {
                     stringBuilder2.append("NULL").append(",");
                 }else{
-                    stringBuilder2.append("'").append(value).append("'").append(",");
+                    String str = String.valueOf(value);
+                    if(str.contains("'")){
+                        str = str.replace("'","\\\'");
+                    }
+                    stringBuilder2.append("'").append(str).append("'").append(",");
                 }
             }
             String substring = stringBuilder2.substring(0, stringBuilder2.length() - 1);
@@ -204,15 +225,8 @@ public class MysqlStructureLoader implements StructureLoader {
                 if (table != null) {
                     table.getIndexs().add(index);
                 }
-                //indexs.put(index.getTableName(), index);
             }
         }
-//        for (Index index : indexs.values()) {
-//            Table table = tableMappper.get(index.getTableName());
-//            if (table != null) {
-//                table.getIndexs().add(index);
-//            }
-//        }
         return tables;
     }
 }

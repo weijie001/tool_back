@@ -2,8 +2,6 @@ package com.tool.compare.context;
 
 
 import com.tool.compare.model.Table;
-import com.tool.util.JdbcUtil;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -118,14 +116,13 @@ public class MatchedTableItem extends AbstractMatchedItem {
     public CompareResult compare() {
         if (left == null) {
             result = CompareResult.LEFT_NOT_EXIST;
-            this.sql = "drop table " + right.getName();
+            this.sql = "drop table `" + right.getName()+"`;";
             return result;
         }
         if (right == null) {
             result = CompareResult.RIGHT_NOT_EXIST;
             String exeSql = "show create table " + left.getName();
-            JdbcTemplate leftJdbcTemplate = JdbcUtil.getDefaultDataJdbc("dev");
-            List<Map<String, Object>> maps = leftJdbcTemplate.queryForList(exeSql);
+            List<Map<String, Object>> maps = CompareJdbcTemplate.getLeftJdbcTemplate().queryForList(exeSql);
             this.sql = (String)maps.get(0).get("Create Table");
             return result;
         }

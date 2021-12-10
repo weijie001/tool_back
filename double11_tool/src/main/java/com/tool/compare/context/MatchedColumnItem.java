@@ -60,7 +60,7 @@ public class MatchedColumnItem extends AbstractMatchedItem {
     public CompareResult compare() {
         if (left == null) {
             result = CompareResult.LEFT_NOT_EXIST;
-            this.sql = "alter table " + right.getTableName() + " drop column " + right.getName()+";";
+            this.sql = "alter table `" + right.getTableName() + "` drop column `" + right.getName()+"`;";
             return result;
         }
         if (right == null) {
@@ -85,25 +85,28 @@ public class MatchedColumnItem extends AbstractMatchedItem {
 
     private String getSql(Column column,String operate) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("alter table ")
+        String length = column.getLength();
+        stringBuilder.append("alter table `")
                 .append(column.getTableName())
-                .append(" ")
+                .append("` ")
                 .append(operate)
-                .append(" column ")
+                .append(" column `")
                 .append(column.getName())
-                .append(" ")
-                .append(column.getType())
-                .append("(")
-                .append(column.getLength())
-                .append(") ");
-
-        boolean notNull = column.isNotNull();
-        if (notNull) {
-            stringBuilder.append("not ");
+                .append("` ")
+                .append(column.getType());
+        if (length != null) {
+            stringBuilder.append("(")
+                    .append(column.getLength())
+                    .append(") ");
         }
-        stringBuilder.append("null ");
+        boolean notNull = column.isNotNull();
+        //stringBuilder.append(" default ");
+        if (notNull) {
+            stringBuilder.append(" not ");
+        }
+        stringBuilder.append(" null ");
         String defaultValue = column.getDefaultValue();
-        if (!StringUtils.isEmpty(defaultValue)) {
+        if (defaultValue != null) {
             stringBuilder.append("default ");
             if (column.getType().endsWith("int")) {
                 stringBuilder.append(defaultValue).append(" ");
@@ -115,7 +118,13 @@ public class MatchedColumnItem extends AbstractMatchedItem {
         if (!StringUtils.isEmpty(comment)) {
             stringBuilder.append("comment '").append(comment).append("' ");
         }
-        stringBuilder.append("after ").append(column.getPrefixName());
+        String prefixName = column.getPrefixName();
+        if (prefixName == null) {
+            stringBuilder.append("first ");
+        }else{
+            stringBuilder.append("after `").append(column.getPrefixName());
+            stringBuilder.append("`");
+        }
         stringBuilder.append(";");
         return stringBuilder.toString();
     }

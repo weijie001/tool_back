@@ -19,7 +19,7 @@ public class DatabaseStructureLoader {
             return new MysqlStructureLoader().loadDatabaseStructure(JdbcTemplate,dataBaseName);
     }
 
-    public List<CompareData> loadColumns(JdbcTemplate JdbcTemplate, String dataBaseName,String userId) {
-         return new MysqlStructureLoader().compareData(JdbcTemplate,dataBaseName,userId);
+    public List<CompareData> loadColumns(JdbcTemplate JdbcTemplate, String dataBaseName,String userId,boolean sync) {
+         return new MysqlStructureLoader().compareData(JdbcTemplate,dataBaseName,userId,sync);
     }
 }

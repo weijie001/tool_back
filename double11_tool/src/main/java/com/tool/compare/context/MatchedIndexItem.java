@@ -3,8 +3,11 @@ package com.tool.compare.context;
 import com.tool.compare.model.Index;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MatchedIndexItem extends AbstractMatchedItem {
-    private String sql;
+    private List<String> sqls = new ArrayList<>();
     /**
      * 左边
      */
@@ -48,25 +51,28 @@ public class MatchedIndexItem extends AbstractMatchedItem {
         this.right = right;
     }
 
-    public String getSql() {
-        return sql;
+    public List<String> getSqls() {
+        return sqls;
     }
 
-    public void setSql(String sql) {
-        this.sql = sql;
+    public void setSqls(List<String> sqls) {
+        this.sqls = sqls;
     }
 
     @Override
     public CompareResult compare() {
         if (left == null) {
             result = CompareResult.LEFT_NOT_EXIST;
-            this.sql = "alter table " + right.getTableName() + " drop index "+ right.getName() + ";";
+            this.sqls.add("alter table `" + right.getTableName() + "` drop index `"+ right.getName() + "`;");
+            //this.sql = "alter table `" + right.getTableName() + "` drop index `"+ right.getName() + "`;";
             return result;
         }
         if (right == null) {
             result = CompareResult.RIGHT_NOT_EXIST;
             String columnsStr = String.join(",", left.getColumns());
-            this.sql = "alter table " + left.getTableName() + " add index " + left.getName() + "(" + columnsStr + ") using " + left.getIndexMethod() + ";";
+            columnsStr = "`" + columnsStr.replace(",", "`,`") + "`";
+            this.sqls.add("alter table `" + left.getTableName() + "` add index `" + left.getName() + "`(" + columnsStr + ") using " + left.getIndexMethod() + ";");
+            //this.sql = "alter table `" + left.getTableName() + "` add index `" + left.getName() + "`(" + columnsStr + ") using " + left.getIndexMethod() + ";";
             return result;
         }
         result = CompareResult.NOT_EQUAL;
@@ -79,12 +85,16 @@ public class MatchedIndexItem extends AbstractMatchedItem {
             System.out.println();
             String name = left.getName();
             String columnsStr = String.join(",", left.getColumns());
+            columnsStr = "`" + columnsStr.replace(",", "`,`") + "`";
             if ("PRIMARY".equals(name)) {
-                this.sql = "alter table " + left.getTableName() + " drop primary key;\n";
-                this.sql+="alter table "+ left.getTableName() + " add primary key ("+columnsStr+");";
+                this.sqls.add("alter table `" + left.getTableName() + "` drop primary key;");
+                //this.sql = "alter table `" + left.getTableName() + "` drop primary key;\n";
+                this.sqls.add("alter table `"+ left.getTableName() + "` add primary key ("+columnsStr+");");
+                //this.sql+="alter table `"+ left.getTableName() + "` add primary key ("+columnsStr+");";
             }else{
                 //修改索引
-                this.sql = "alter table " + left.getTableName() + " drop index " + left.getName() + ",add index " + left.getName() + "(" + columnsStr + ") using " + left.getIndexMethod() + ";";
+                this.sqls.add("alter table `"+ left.getTableName() + "` add primary key ("+columnsStr+");");
+                //this.sql = "alter table `" + left.getTableName() + "` drop index `" + left.getName() + "`,add index `" + left.getName() + "`(" + columnsStr + ") using " + left.getIndexMethod() + ";";
                 System.out.println();
             }
         }
