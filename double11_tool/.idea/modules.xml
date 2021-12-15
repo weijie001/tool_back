@@ -3,6 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/double11_tool.iml" filepath="$PROJECT_DIR$/double11_tool.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tool-bean/tool-bean.iml" filepath="$PROJECT_DIR$/tool-bean/tool-bean.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tool-dao/tool-dao.iml" filepath="$PROJECT_DIR$/tool-dao/tool-dao.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tool-manager/tool-manager.iml" filepath="$PROJECT_DIR$/tool-manager/tool-manager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tool-service/tool-service.iml" filepath="$PROJECT_DIR$/tool-service/tool-service.iml" />
     </modules>
   </component>
 </project>
