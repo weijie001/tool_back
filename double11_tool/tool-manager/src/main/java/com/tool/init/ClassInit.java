@@ -1,11 +1,11 @@
 package com.tool.init;
 
 import com.tool.bean.Config;
-import com.tool.bean.JdbcInfo;
 import com.tool.dao.ConfigDao;
-import com.tool.dao.JdbcInfoDao;
+import com.tool.jdbc.JdbcInfo;
+import com.tool.jdbc.JdbcInfoDao;
+import com.tool.jdbc.JdbcManage;
 import com.tool.manage.ConfigManage;
-import com.tool.manage.JdbcManage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -20,7 +20,8 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 

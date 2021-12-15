@@ -96,7 +96,7 @@ public class DbCompareController extends BaseController{
     }
     private List<String> tablejg(String env,String dbType) {
         List<String> sqls = new ArrayList<>();
-        List<MatchedTableItem> matchedTableItems = compareF(env, dbType);
+        List<MatchedTableItem> matchedTableItems = compareStructure(env, dbType);
         for (MatchedTableItem matchedTableItem : matchedTableItems) {
             String sql = matchedTableItem.getSql();
             if(!StringUtils.isEmpty(sql)){
@@ -208,12 +208,16 @@ public class DbCompareController extends BaseController{
         SqlManager.setCompareData(compareData);
         return compareData;
     }
+
+    /**
+     * 表结构对比
+     */
     @RequestMapping("compare")
     public ResponseResult<List<MatchedTableItem>> compare(@RequestParam("env") String env,@RequestParam("dbType") String dbType){
-        List<MatchedTableItem> matchedTableItems = compareF(env, dbType);
+        List<MatchedTableItem> matchedTableItems = compareStructure(env, dbType);
         return new ResponseResult<>(0,matchedTableItems,null);
     }
-    private List<MatchedTableItem> compareF(String env, String dbType) {
+    private List<MatchedTableItem> compareStructure(String env, String dbType) {
         long start = System.currentTimeMillis();
         DatabaseComparator comparator = new DatabaseComparator();
         JdbcTemplate leftJdbcTemplate;

@@ -2,12 +2,12 @@ package com.tool.controller;
 
 import com.tool.bean.Item;
 import com.tool.bean.ItemAward;
-import com.tool.bean.JdbcInfo;
 import com.tool.dao.CommonDao;
 import com.tool.dao.ConfigDao;
 import com.tool.dao.ItemDao;
 import com.tool.dao.TeamDao;
-import com.tool.manage.JdbcManage;
+import com.tool.jdbc.JdbcInfo;
+import com.tool.jdbc.JdbcManage;
 import com.tool.util.CommonUtil;
 import com.tool.util.FileUtil;
 import com.tool.util.JdbcUtil;

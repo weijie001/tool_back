@@ -17,7 +17,6 @@ import com.tool.util.FileUtil;
 import com.tool.util.JdbcUtil;
 import com.tool.util.ShellUtil;
 import net.galasports.account.bean.ErrorCode;
-import net.galasports.account.bean.protocol.BaseProtos;
 import net.galasports.account.bean.protocol.UserProtos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
