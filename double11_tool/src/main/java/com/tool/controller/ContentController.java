@@ -133,10 +133,10 @@ public class ContentController {
             sqlBefore.append(tableName).append("(");
             List<String> excelColumns = new ArrayList<>();
             for (int j = 0; j < physicalNumberOfCells; j++) {
-                if (firstRow.getCell(j) == null) {
-                    break;
+                String str = "";
+                if (firstRow.getCell(j) != null) {
+                    str = firstRow.getCell(j).getStringCellValue();
                 }
-                String str = firstRow.getCell(j).getStringCellValue();
                 excelColumns.add(str);
                 str = str.replace("[I18N]", "").toLowerCase();
                 if (columnNames.contains(str)) {

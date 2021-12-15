@@ -31,18 +31,35 @@ public class MysqlStructureLoader implements StructureLoader {
     public List<String> loadDatabaseNames(Connection connection) throws Exception {
         return null;
     }
-    private String getCompareSql(List<String> columns,String leftDataBase,String rightDataBase,String tableName) {
+    private String getCompareSql(List<Column> columns,String leftDataBase,String rightDataBase,String tableName) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("select * from ").append(leftDataBase).append(".").append(tableName).append(" t1 where not EXISTS( select 1 from ").
                 append(rightDataBase).append(".").append(tableName).append(" t2 where 1 = 1");
-        for (String str : columns) {
-            stringBuilder.append(" and ifnull(t1.")
-                    .append(str)
-                    .append(",'')= ifnull(t2.")
-                    .append(str)
-                    .append(",'') ");
+        for (Column column : columns) {
+            boolean notNull = column.isNotNull();
+
+            stringBuilder.append(" and ");
+            if (!notNull) {
+                stringBuilder.append("ifnull(");
+            }
+            stringBuilder
+                    .append("t1.`")
+                    .append(column.getName()).append("`");
+            if (!notNull) {
+                stringBuilder
+                        .append(",'')");
+            }
+            stringBuilder.append("= ");
+            if (!notNull) {
+                stringBuilder.append("ifnull(");
+            }
+            stringBuilder.append("t2.`")
+                    .append(column.getName()).append("`");
+            if (!notNull) {
+                stringBuilder.append(",'') ");
+            }
         }
-        stringBuilder.append(");");
+        stringBuilder.append(" );");
         return stringBuilder.toString();
     }
     public String getTimestampValue(String value) {
@@ -66,6 +83,7 @@ public class MysqlStructureLoader implements StructureLoader {
         if (sync) {
             WebSocketManager.sendMessage2(userId, "==========>>          ");
         }
+        Map<String, List<Column>> columnMaps = getColumns(jdbcTemplate, databaseName);
         for (Table table : tables) {
             int percent = index*100/size;
             if (sync) {
@@ -74,7 +92,7 @@ public class MysqlStructureLoader implements StructureLoader {
                 WebSocketManager.sendMessage2(userId, percent +"$"+table.getName());
             }
             try {
-                loadColumns(jdbcTemplate, databaseName, table.getName(), compareDatas);
+                loadColumns(jdbcTemplate, databaseName, table.getName(), compareDatas,columnMaps.get(table.getName()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -88,10 +106,11 @@ public class MysqlStructureLoader implements StructureLoader {
         System.out.println("数据对比时间"+(System.currentTimeMillis()-l));
         return compareDatas;
     }
-    public void loadColumns(JdbcTemplate jdbcTemplate, String databaseName,String tableName,List<CompareData> compareDatas) {
-        String colSql = "SELECT COLUMN_NAME AS `name` from information_schema.`COLUMNS` where TABLE_SCHEMA  =  '" + databaseName + "' and table_name ='"+tableName+"'";
-        List<String> columns = jdbcTemplate.query(colSql, (resultSet, i) -> resultSet.getString("name"));
-        String compareSql2 = getCompareSql(columns, CompareJdbcTemplate.getRightDataBaseName(), CompareJdbcTemplate.getLeftDataBaseName(),tableName);
+    public void loadColumns(JdbcTemplate jdbcTemplate, String databaseName,String tableName,List<CompareData> compareDatas,List<Column> columnList) {
+        //String colSql = "SELECT COLUMN_NAME AS `name` from information_schema.`COLUMNS` where TABLE_SCHEMA  =  '" + databaseName + "' and table_name ='"+tableName+"'";
+        //List<String> columns = jdbcTemplate.query(colSql, (resultSet, i) -> resultSet.getString("name"));
+        //List<String> columns  = columnList.stream().map(Column::getName).collect(Collectors.toList());
+        String compareSql2 = getCompareSql(columnList, CompareJdbcTemplate.getRightDataBaseName(), CompareJdbcTemplate.getLeftDataBaseName(),tableName);
         List<Map<String, Object>> removeLists = jdbcTemplate.queryForList(compareSql2);
         List<String> deleteSqls = new ArrayList<>();
         for (Map<String, Object> map : removeLists) {
@@ -105,14 +124,18 @@ public class MysqlStructureLoader implements StructureLoader {
                 if (value == null) {
                     stringBuilder1.append(" and `").append(entry.getKey()).append("` is null");
                 }else{
-                    stringBuilder1.append(" and `").append(entry.getKey()).append("` =  '").append(entry.getValue()).append("'");
+                    String str = String.valueOf(value);
+                    if(str.contains("'")){
+                        str = str.replace("'","\\\'");
+                    }
+                    stringBuilder1.append(" and `").append(entry.getKey()).append("` =  '").append(str).append("'");
                 }
             }
             stringBuilder1.append(";");
             String replace = stringBuilder1.toString().replace("1 = 1 and", "");
             deleteSqls.add(replace);
         }
-        String compareSql = getCompareSql(columns, CompareJdbcTemplate.getLeftDataBaseName(), CompareJdbcTemplate.getRightDataBaseName(),tableName);
+        String compareSql = getCompareSql(columnList, CompareJdbcTemplate.getLeftDataBaseName(), CompareJdbcTemplate.getRightDataBaseName(),tableName);
         List<Map<String, Object>> maps = jdbcTemplate.queryForList(compareSql);
         List<String> insertSqls = new ArrayList<>();
         for (Map<String, Object> map : maps) {
@@ -164,11 +187,7 @@ public class MysqlStructureLoader implements StructureLoader {
         });
         return tables;
     }
-    private List<Table> loadTables(JdbcTemplate jdbcTemplate, String databaseName) {
-        // 加载表结构
-        List<Table> tables = getAllTables(jdbcTemplate, databaseName);
-        Map<String, Table> tableMappper = tables.stream().collect(Collectors.toMap(Table::getName, t -> t));
-
+    private Map<String, List<Column>> getColumns(JdbcTemplate jdbcTemplate, String databaseName) {
         String colSql = "SELECT TABLE_NAME as `table_name`,COLUMN_NAME  as `name`,DATA_TYPE as `type` ,IFNULL(CHARACTER_MAXIMUM_LENGTH,NUMERIC_PRECISION) as length ,NUMERIC_SCALE as scale ,COLUMN_COMMENT as `comment` ,COLUMN_DEFAULT as `default_value` ,IS_NULLABLE as `is_nullable`,EXTRA as 'extra',ORDINAL_POSITION as `ordinal_position` from information_schema.`COLUMNS` where TABLE_SCHEMA  =  '"+databaseName+"'";
         List<Column> columns = jdbcTemplate.query(colSql, (resultSet, i) -> {
             Column column = new Column();
@@ -184,7 +203,14 @@ public class MysqlStructureLoader implements StructureLoader {
             column.setOrdinalPosition(resultSet.getInt("ordinal_position"));
             return column;
         });
-        Map<String, List<Column>> columnMap = columns.stream().collect(Collectors.groupingBy(Column::getTableName, Collectors.toList()));
+        return  columns.stream().collect(Collectors.groupingBy(Column::getTableName, Collectors.toList()));
+    }
+    private List<Table> loadTables(JdbcTemplate jdbcTemplate, String databaseName) {
+        // 加载表结构
+        List<Table> tables = getAllTables(jdbcTemplate, databaseName);
+        Map<String, Table> tableMappper = tables.stream().collect(Collectors.toMap(Table::getName, t -> t));
+
+        Map<String, List<Column>> columnMap = getColumns(jdbcTemplate,databaseName);
         for (Table table : tables) {
             List<Column> columns1 = columnMap.get(table.getName()).stream().sorted(Comparator.comparing(Column::getOrdinalPosition)).collect(Collectors.toList());
             Map<Integer, String> columnsMap = columns1.stream().collect(Collectors.toMap(Column::getOrdinalPosition, t -> t.getName()));
